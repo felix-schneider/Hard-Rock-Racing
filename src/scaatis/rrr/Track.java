@@ -24,7 +24,13 @@ public class Track {
 	private Direction startDir;
 
 	public Track(Direction startDir, List<TrackTile> tiles) {
-		this(startDir, (TrackTile[]) tiles.toArray());
+		this(startDir, convert(tiles));
+	}
+
+	private static TrackTile[] convert(List<TrackTile> tiles) {
+		TrackTile[] tiles2 = new TrackTile[tiles.size()];
+		tiles.toArray(tiles2);
+		return tiles2;
 	}
 
 	public Track(Direction startDir, TrackTile... tiles) {
@@ -61,7 +67,7 @@ public class Track {
 		this.tiles = tiles;
 		bake();
 	}
-	
+
 	public Area getTrackArea() {
 		return track;
 	}

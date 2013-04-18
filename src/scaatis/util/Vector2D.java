@@ -1,6 +1,10 @@
 package scaatis.util;
 
 public abstract class Vector2D {
+	
+	protected Vector2D() {
+		
+	}
 
 	public abstract double getX();
 
@@ -29,21 +33,25 @@ public abstract class Vector2D {
 	public abstract double getMagnitude();
 
 	public abstract double getSquareMagnitude();
+	
+	public String toString() {
+		return "(" + getX() + ", " + getY() + ")";
+	}
 
-	public final class DirMag extends Vector2D {
+	public static class Polar extends Vector2D {
 		private double direction;
 		private double magnitude;
 
-		public DirMag(double direction, double magnitude) {
+		public Polar(double direction, double magnitude) {
 			this.direction = direction;
 			this.magnitude = magnitude;
 		}
 
-		public DirMag() {
+		public Polar() {
 			this(0, 1);
 		}
 
-		public DirMag(Vector2D other) {
+		public Polar(Vector2D other) {
 			this(other.getDirection(), other.getMagnitude());
 		}
 
@@ -59,7 +67,7 @@ public abstract class Vector2D {
 
 		@Override
 		public Vector2D add(Vector2D other) {
-			return new DirMag(new XY(this).add(new XY(other)));
+			return new Polar(new Cartesian(this).add(new Cartesian(other)));
 		}
 
 		@Override
@@ -69,12 +77,12 @@ public abstract class Vector2D {
 
 		@Override
 		public Vector2D scale(double factor) {
-			return new DirMag(direction, magnitude * factor);
+			return new Polar(direction, magnitude * factor);
 		}
 
 		@Override
 		public Vector2D rotate(double theta) {
-			return new DirMag(direction + theta, magnitude);
+			return new Polar(direction + theta, magnitude);
 		}
 
 		@Override
@@ -99,20 +107,20 @@ public abstract class Vector2D {
 		}
 	}
 
-	public final class XY extends Vector2D {
+	public static class Cartesian extends Vector2D {
 		private double x;
 		private double y;
 
-		public XY(double x, double y) {
+		public Cartesian(double x, double y) {
 			this.x = x;
 			this.y = y;
 		}
 
-		public XY() {
+		public Cartesian() {
 			this(1, 0);
 		}
 
-		public XY(Vector2D other) {
+		public Cartesian(Vector2D other) {
 			this(other.getX(), other.getY());
 		}
 
@@ -128,22 +136,22 @@ public abstract class Vector2D {
 
 		@Override
 		public Vector2D add(Vector2D other) {
-			return new XY(x + other.getX(), y + other.getY());
+			return new Cartesian(x + other.getX(), y + other.getY());
 		}
 
 		@Override
 		public Vector2D subtract(Vector2D other) {
-			return new XY(x - other.getX(), y - other.getY());
+			return new Cartesian(x - other.getX(), y - other.getY());
 		}
 
 		@Override
 		public Vector2D scale(double factor) {
-			return new XY(x * factor, y * factor);
+			return new Cartesian(x * factor, y * factor);
 		}
 
 		@Override
 		public Vector2D rotate(double theta) {
-			return new XY(new DirMag(this).rotate(theta));
+			return new Cartesian(new Polar(this).rotate(theta));
 		}
 
 		@Override
