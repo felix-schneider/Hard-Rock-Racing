@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 
@@ -87,7 +88,14 @@ public class TrackTest extends JPanel {
 		g2d.transform(AffineTransform.getRotateInstance(Math.PI / 4));
 		g2d.setColor(Color.white);
 		g2d.fill(track.getTrackArea());
-		g2d.draw(track.getTrackArea().getBounds2D());
+		g2d.setColor(Color.green);
+		g2d.fill(track.getFinishLine());
+		g2d.setColor(Color.yellow);
+		for(Area checkPoint : track.getCheckpoints()) {
+			g2d.fill(checkPoint);
+		}
+		
+		// Draw Circle
 		Point2D pos = getPosition(i);
 		g2d.transform(AffineTransform.getTranslateInstance(pos.getX(), pos.getY()));
 		g2d.setColor(Color.darkGray);
@@ -95,7 +103,7 @@ public class TrackTest extends JPanel {
 	}
 
 	private Point2D getPosition(int i) {
-		double angle = ((double) i) / 50.0 * Math.PI;
+		double angle =  -((double) i) / 50.0 * Math.PI;
 		double x = Math.sin(angle) * 200;
 		double y = Math.cos(angle) * 200;
 		return new Point2D.Double(270 + x, 270 + y);

@@ -61,11 +61,7 @@ public class Track {
 		this.tiles = tiles;
 		bake();
 	}
-
-	public TrackTile[] getTiles() {
-		return tiles;
-	}
-
+	
 	public Area getTrackArea() {
 		return track;
 	}
