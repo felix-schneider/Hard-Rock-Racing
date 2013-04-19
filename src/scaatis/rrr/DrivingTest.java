@@ -5,9 +5,12 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -27,6 +30,7 @@ public class DrivingTest extends JPanel implements KeyListener {
 	private Car car;
 	private boolean running;
 	private double diagonal;
+	private Area negative;
 
 	public DrivingTest() {
 		ArrayList<TrackTile> tiles = new ArrayList<>();
@@ -56,12 +60,16 @@ public class DrivingTest extends JPanel implements KeyListener {
 		double w = track.getTrackArea().getBounds2D().getWidth();
 		double h = track.getTrackArea().getBounds2D().getHeight();
 		diagonal = Math.sqrt(w * w + h * h);
+		Rectangle rectangle = new Rectangle(track.getTrackArea().getBounds());
+		rectangle.grow(10, 10);
+		negative = new Area(rectangle);
+		negative.subtract(track.getTrackArea());
 	}
 
 	@Override
 	public Dimension getPreferredSize() {
-		return new Dimension((int) diagonal, (int) (diagonal / 4));
-//		return track.getTrackArea().getBounds().getSize();
+		// return new Dimension((int) diagonal, (int) (diagonal / 4));
+		return track.getTrackArea().getBounds().getSize();
 	}
 
 	public static void main(String[] args) {
@@ -77,16 +85,23 @@ public class DrivingTest extends JPanel implements KeyListener {
 
 	public void run() {
 		running = true;
+		long timeA = System.nanoTime();
+		long timeB = timeA;
 		while (running) {
-			long timeA = System.nanoTime();
 			try {
-				Thread.sleep(1000 / 30);
+				Thread.sleep((int) (1000 / 30.0 - (timeB - timeA) / 1e6));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			long timeB = System.nanoTime();
+			timeB = System.nanoTime();
 			double delta = (timeB - timeA) / 1e9;
+			timeA = System.nanoTime();
 			car.update(delta);
+			Area intersection = car.getArea();
+			intersection.intersect(negative);
+			if (!intersection.isEmpty()) {
+				car.collideWith(track, intersection);
+			}
 			repaint();
 		}
 	}
@@ -111,10 +126,11 @@ public class DrivingTest extends JPanel implements KeyListener {
 		g2d.setColor(Color.black);
 		g2d.fillRect(0, 0, getWidth(), getHeight());
 		// I don't wanna do math! you can't make me!
-		g2d.transform(AffineTransform.getTranslateInstance(diagonal / 2 - 50, 0));
-		g2d.transform(AffineTransform.getScaleInstance(1, .25));
-		g2d.transform(AffineTransform.getRotateInstance(.25 * Math.PI));
-		
+		// g2d.transform(AffineTransform
+		// .getTranslateInstance(diagonal / 2 - 50, 0));
+		// g2d.transform(AffineTransform.getScaleInstance(1, .25));
+		// g2d.transform(AffineTransform.getRotateInstance(.25 * Math.PI));
+
 		g2d.setColor(Color.white);
 		g2d.fill(track.getTrackArea());
 		g2d.setColor(Color.darkGray);
@@ -129,7 +145,6 @@ public class DrivingTest extends JPanel implements KeyListener {
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_UP && !up) {
 			car.setAccelerating(true);
-			System.out.println("forward!");
 			up = true;
 		} else if (e.getKeyCode() == KeyEvent.VK_LEFT && !left) {
 			car.setTurning(Direction.LEFT);

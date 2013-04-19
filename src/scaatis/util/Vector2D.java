@@ -1,9 +1,11 @@
 package scaatis.util;
 
+import java.awt.geom.Point2D;
+
 public abstract class Vector2D {
-	
+
 	protected Vector2D() {
-		
+
 	}
 
 	public abstract double getX();
@@ -33,7 +35,7 @@ public abstract class Vector2D {
 	public abstract double getMagnitude();
 
 	public abstract double getSquareMagnitude();
-	
+
 	public String toString() {
 		return "(" + getX() + ", " + getY() + ")";
 	}
@@ -122,6 +124,14 @@ public abstract class Vector2D {
 
 		public Cartesian(Vector2D other) {
 			this(other.getX(), other.getY());
+		}
+
+		public Cartesian(Point2D p) {
+			this(p.getX(), p.getY());
+		}
+
+		public Cartesian(Point2D p1, Point2D p2) {
+			this(p2.getX() - p1.getX(), p2.getY() - p1.getY());
 		}
 
 		@Override
