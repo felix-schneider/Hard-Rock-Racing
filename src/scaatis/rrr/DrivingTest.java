@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -25,6 +26,7 @@ public class DrivingTest extends JPanel implements KeyListener {
 	private Track track;
 	private Car car;
 	private boolean running;
+	private double diagonal;
 
 	public DrivingTest() {
 		ArrayList<TrackTile> tiles = new ArrayList<>();
@@ -51,11 +53,15 @@ public class DrivingTest extends JPanel implements KeyListener {
 				.getFinishLine().getBounds().y + 113);
 		car = new Car(start, track.getStartDirection());
 		running = false;
+		double w = track.getTrackArea().getBounds2D().getWidth();
+		double h = track.getTrackArea().getBounds2D().getHeight();
+		diagonal = Math.sqrt(w * w + h * h);
 	}
 
 	@Override
 	public Dimension getPreferredSize() {
-		return track.getTrackArea().getBounds().getSize();
+		return new Dimension((int) diagonal, (int) (diagonal / 4));
+//		return track.getTrackArea().getBounds().getSize();
 	}
 
 	public static void main(String[] args) {
@@ -104,6 +110,11 @@ public class DrivingTest extends JPanel implements KeyListener {
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setColor(Color.black);
 		g2d.fillRect(0, 0, getWidth(), getHeight());
+		// I don't wanna do math! you can't make me!
+		g2d.transform(AffineTransform.getTranslateInstance(diagonal / 2 - 50, 0));
+		g2d.transform(AffineTransform.getScaleInstance(1, .25));
+		g2d.transform(AffineTransform.getRotateInstance(.25 * Math.PI));
+		
 		g2d.setColor(Color.white);
 		g2d.fill(track.getTrackArea());
 		g2d.setColor(Color.darkGray);

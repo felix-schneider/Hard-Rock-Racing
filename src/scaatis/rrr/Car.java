@@ -28,23 +28,24 @@ public class Car implements Updates {
 	public static final Rectangle2D hitbox = new Rectangle2D.Double(0, 0, 60,
 			45);
 
-	public static final double topSpeed = 100;
+	public static final double frontFriction = 100;
+	public static final double sidewaysFriction = 400;
 
-	public static final double acceleration = 150;
+	public static final double topSpeed = 150;
 
-	public static final double friction = 200;
+	public static final double acceleration = 125 + frontFriction;
 
 	/**
 	 * Turning speed in radians/second
 	 */
-	public static final double turningSpeed = .6 * Math.PI;
+	public static final double turningSpeed = .35 * Math.PI;
 
 	private static final double epsilon = 10e-5;
 
 	/**
 	 * Minimum speed in units/second the car must have for full turning speed
 	 */
-	public static final double minSpeed = 2;
+	public static final double minSpeed = 50;
 
 	private Point2D location;
 	private Vector2D speed;
@@ -119,10 +120,13 @@ public class Car implements Updates {
 		}
 
 		// friction and drag
-		double angle = facing - speed.getDirection();
-		double magnitude = Math.abs(Math.sin(angle)) * friction;
-		accel = accel.add(new Vector2D.Polar(speed.getDirection() - Math.PI,
-				magnitude));
+		if (speed.getMagnitude() > epsilon) {
+			double angle = facing - speed.getDirection();
+			double magnitude = Math.abs(Math.sin(angle))
+					* (sidewaysFriction - frontFriction) + frontFriction;
+			accel = accel.add(new Vector2D.Polar(speed.getDirection() - Math.PI,
+					magnitude));
+		}
 
 		Vector2D loc = new Vector2D.Cartesian(location.getX(), location.getY());
 		Vector2D oldSpeed = speed;
