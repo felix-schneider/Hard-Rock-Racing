@@ -3,3 +3,5 @@ Hard Rock Racing (formerly Rock n Roll Racing)
 This game is intended for AI exercises and allows/will allow an AI to connect to this server application and communicate with it via JSON. More documentation as I actually implement features.
 
 Run TrackTest for a demonstration of how a track is constructed and rendered.
+
+Run DrivingTest to go for a ride!
