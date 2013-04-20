@@ -17,7 +17,7 @@ import scaatis.rrr.tracktiles.CheckPoint;
 import scaatis.rrr.tracktiles.FinishLine;
 import scaatis.rrr.tracktiles.TrackTile;
 
-public class Track {
+public class Track implements Collides {
 	private TrackTile[] tiles;
 	private BufferedImage image;
 	private Area track;
@@ -52,7 +52,8 @@ public class Track {
 					throw new IllegalArgumentException(
 							"Track contains several start/finish lines.");
 				}
-			} else if (tile instanceof CheckPoint) {
+			} 
+			if (tile instanceof CheckPoint) {
 				checkpoints++;
 			}
 			tile.calcLocation(state);
@@ -65,13 +66,18 @@ public class Track {
 			throw new IllegalArgumentException(
 					"Track contains no start/finish line.");
 		}
-		if (checkpoints == 0) {
+		if (checkpoints <= 1) {
 			throw new IllegalArgumentException("Track contains no checkpoints.");
 		}
 		this.startDir = startDir;
 		this.tiles = tiles;
 		bake();
 		makeNegative();
+	}
+	
+	@Override
+	public Area getArea() {
+		return getNegative();
 	}
 
 	public Area getTrackArea() {

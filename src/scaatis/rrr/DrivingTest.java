@@ -108,7 +108,7 @@ public class DrivingTest extends JPanel implements KeyListener {
 	}
 
 	public static void createAndShowShit(DrivingTest t) {
-		JFrame frame = new JFrame("Driving Test");
+		JFrame frame = new JFrame(t.getClass().getSimpleName());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(t);
 		frame.pack();

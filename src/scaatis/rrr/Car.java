@@ -23,7 +23,7 @@ import scaatis.util.Vector2D;
  * @author Felix Schneider
  * @version
  */
-public class Car implements Updates {
+public class Car extends GameObject implements Collides {
 	/**
 	 * The hitbox of the car when facing positive x
 	 */
@@ -34,7 +34,6 @@ public class Car implements Updates {
 	public static final double sidewaysFriction = 500;
 
 	public static final double topSpeed = 200;
-
 	public static final double acceleration = 140 + frontFriction;
 
 	/**
@@ -48,57 +47,174 @@ public class Car implements Updates {
 	public static final double minSpeed = 50;
 
 	public static final double collisionRotation = Math.toRadians(15);
-
 	public static final double collisionRepulsion = 40;
-
 	public static final double collisionCooldown = .5;
+
+	/**
+	 * Minimum speed difference so that a player will take damage in a collision
+	 */
+	public static final double damageThreshHold = 90;
+	public static final int maxHP = 6;
+	public static final int maxMissiles = 3;
 
 	private static final double epsilon = 10e-5;
 
-	private Point2D location;
-	private Vector2D speed;
 	private double facing;
 
 	private int accelerating; // 0 not accelerating, 1 forward, 2 backward
 	private int turning; // 0 - not turning, > 0 turning from positive x to
 							// positive y, < 0 the other way
 	private double cooldown;
+	private int hp;
+	private int missiles;
 
 	public Car() {
 		this(new Point(), 0);
 	}
 
 	public Car(Point2D location, double facing) {
-		this.location = new Point2D.Double(location.getX(), location.getY());
+		super(location, new Vector2D.Polar(0, 0));
 		this.facing = facing;
-		speed = new Vector2D.Polar(0, 0);
 		accelerating = 0;
 		turning = 0;
 		cooldown = 0;
+		hp = maxHP;
+		missiles = maxMissiles;
 	}
 
 	public Car(Point2D location, Direction facing) {
 		this(location, facing.getAngle());
 	}
 
-	public Point2D getLocation() {
-		return (Point2D) location.clone();
+	@Override
+	public void update(double delta) {
+		if (cooldown > epsilon) {
+			cooldown -= delta;
+		}
+
+		if (turning != 0) {
+			facing += Math.signum(turning) * turningSpeed
+					* Math.min(1, getSpeed().getMagnitude() / minSpeed) * delta;
+		}
+
+		Vector2D accel = new Vector2D.Cartesian(0, 0);
+
+		// car acceleration
+		if (accelerating > 0) {
+			accel = accel.add(new Vector2D.Polar(facing, acceleration));
+		} else if (accelerating < 0) {
+			accel = accel.subtract(new Vector2D.Polar(facing, acceleration));
+		}
+
+		// friction and drag
+		if (getSpeed().getMagnitude() > epsilon) {
+			double angle = facing - getSpeed().getDirection();
+			double magnitude = Math.abs(Math.sin(angle))
+					* (sidewaysFriction - frontFriction) + frontFriction;
+			accel = accel.add(new Vector2D.Polar(getSpeed().getDirection()
+					- Math.PI, magnitude));
+		}
+
+		Vector2D loc = new Vector2D.Cartesian(getLocation().getX(),
+				getLocation().getY());
+		Vector2D oldSpeed = getSpeed();
+		setSpeed(getSpeed().add(accel.scale(delta)));
+		if (getSpeed().getMagnitude() > topSpeed) {
+			setSpeed(new Vector2D.Polar(getSpeed().getDirection(), topSpeed));
+		}
+		loc = loc.add(oldSpeed.add(getSpeed()).scale(delta));
+
+		setLocation(new Point2D.Double(loc.getX(), loc.getY()));
 	}
 
-	public Point getIntLocation() {
-		return new Point((int) location.getX(), (int) location.getY());
+	public Area getArea() {
+		Area res = new Area(hitbox);
+		res.transform(AffineTransform.getTranslateInstance(
+				-hitbox.getWidth() / 2, -hitbox.getHeight() / 2));
+		res.transform(AffineTransform.getRotateInstance(facing));
+		res.transform(AffineTransform.getTranslateInstance(
+				getLocation().getX(), getLocation().getY()));
+		return res;
 	}
 
-	public int getAccelerating() {
-		return accelerating;
+	public void collideWith(Track other) {
+		if (isDestroyed()) {
+			return;
+		}
+		Point2D center = new Point2D.Double(other.getTrackArea().getBounds2D()
+				.getCenterX(), other.getTrackArea().getBounds2D().getCenterY());
+		Vector2D fromCenter = new Vector2D.Cartesian(center, getLocation());
+		double bounceDirection = fromCenter.getDirection();
+		int turndir = -1;
+		Area test = getArea();
+		test.intersect(other.getOuterArea());
+		if (!test.isEmpty()) {
+			bounceDirection += Math.PI;
+			turndir = 1;
+		}
+		Vector2D facingVector = new Vector2D.Polar(facing, 10);
+		Line2D facingLine = new Line2D.Double(getLocation(),
+				facingVector.applyTo(getLocation()));
+		turndir *= CollisionTools.isRight(facingLine, center);
+
+		// turn the car, but only if that doesn't cause another collision
+		double oldFacing = facing;
+		facing += turndir * collisionRotation;
+		test = getArea();
+		test.intersect(other.getNegative());
+		if (!test.isEmpty()) {
+			facing = oldFacing;
+		}
+
+		// brake the car
+		setSpeed(getSpeed().scale(
+				Math.abs(Math.sin(getSpeed().angleBetween(fromCenter)))));
+
+		// bounce
+		setSpeed(getSpeed().add(
+				new Vector2D.Polar(bounceDirection, collisionRepulsion)));
 	}
 
-	public void setAccelerating(int accel) {
-		accelerating = accel;
+	public static void collide(Car one, Car other) {
+		if (one.cooldown > epsilon && other.cooldown > epsilon) {
+			return;
+		}
+		one.cooldown = collisionCooldown;
+		other.cooldown = collisionCooldown;
+		double speedDiff = one.getSpeed().subtract(other.getSpeed())
+				.getMagnitude();
+		Vector2D ab = new Vector2D.Polar(new Vector2D.Cartesian(
+				one.getLocation(), other.getLocation()).getDirection(),
+				speedDiff);
+		one.setSpeed(one.getSpeed().subtract(ab));
+		other.setSpeed(other.getSpeed().add(ab));
+		if (speedDiff > damageThreshHold) {
+			Car slower;
+			if (one.getSpeed().getMagnitude() < other.getSpeed().getMagnitude()) {
+				slower = one;
+			} else {
+				slower = other;
+			}
+			slower.damage((int) (speedDiff / damageThreshHold));
+		}
 	}
 
-	public void setTurning(int turn) {
-		turning = turn;
+	public Missile fireMissile() {
+		if (missiles == 0) {
+			return null;
+		}
+		missiles--;
+		return new Missile(this);
+	}
+
+	public boolean damage(int damage) {
+		hp -= damage;
+		if (hp <= 0) {
+			stopTurning();
+			setAccelerating(0);
+			destroy();
+		}
+		return isDestroyed();
 	}
 
 	public void setTurning(Direction dir) {
@@ -112,103 +228,44 @@ public class Car implements Updates {
 	}
 
 	public void stopTurning() {
-		turning = 0;
+		setTurning(0);
 	}
 
-	@Override
-	public void update(double delta) {
-		if (cooldown > epsilon) {
-			cooldown -= delta;
-		}
-
-		if (turning != 0) {
-			facing += Math.signum(turning) * turningSpeed
-					* Math.min(1, speed.getMagnitude() / minSpeed) * delta;
-		}
-
-		Vector2D accel = new Vector2D.Cartesian(0, 0);
-
-		// car acceleration
-		if (accelerating > 0) {
-			accel = accel.add(new Vector2D.Polar(facing, acceleration));
-		} else if (accelerating < 0) {
-			accel = accel.subtract(new Vector2D.Polar(facing, acceleration));
-		}
-
-		// friction and drag
-		if (speed.getMagnitude() > epsilon) {
-			double angle = facing - speed.getDirection();
-			double magnitude = Math.abs(Math.sin(angle))
-					* (sidewaysFriction - frontFriction) + frontFriction;
-			accel = accel.add(new Vector2D.Polar(
-					speed.getDirection() - Math.PI, magnitude));
-		}
-
-		Vector2D loc = new Vector2D.Cartesian(location.getX(), location.getY());
-		Vector2D oldSpeed = speed;
-		speed = speed.add(accel.scale(delta));
-		if (speed.getMagnitude() > topSpeed) {
-			speed = new Vector2D.Polar(speed.getDirection(), topSpeed);
-		}
-		loc = loc.add(oldSpeed.add(speed).scale(delta));
-
-		location = new Point2D.Double(loc.getX(), loc.getY());
+	public Point getIntLocation() {
+		return new Point((int) getLocation().getX(), (int) getLocation().getY());
 	}
 
-	public Area getArea() {
-		Area res = new Area(hitbox);
-		res.transform(AffineTransform.getTranslateInstance(
-				-hitbox.getWidth() / 2, -hitbox.getHeight() / 2));
-		res.transform(AffineTransform.getRotateInstance(facing));
-		res.transform(AffineTransform.getTranslateInstance(location.getX(),
-				location.getY()));
-		return res;
+	public int getAccelerating() {
+		return accelerating;
 	}
 
-	public void collideWith(Track other) {
-		Point2D center = new Point2D.Double(other.getTrackArea().getBounds2D()
-				.getCenterX(), other.getTrackArea().getBounds2D().getCenterY());
-		Vector2D fromCenter = new Vector2D.Cartesian(center, location);
-		double bounceDirection = fromCenter.getDirection();
-		int turndir = -1;
-		Area test = getArea();
-		test.intersect(other.getOuterArea());
-		if (!test.isEmpty()) {
-			bounceDirection += Math.PI;
-			turndir = 1;
-		}
-		Vector2D facingVector = new Vector2D.Polar(facing, 10);
-		Line2D facingLine = new Line2D.Double(location,
-				facingVector.applyTo(location));
-		turndir *= CollisionTools.isRight(facingLine, center);
-
-		// turn the car, but only if that doesn't cause another collision
-		double oldFacing = facing;
-		facing += turndir * collisionRotation;
-		test = getArea();
-		test.intersect(other.getNegative());
-		if (!test.isEmpty()) {
-			facing = oldFacing;
-		}
-
-		// brake the car
-		speed = speed.scale(Math.abs(Math.sin(speed.angleBetween(fromCenter))));
-
-		// bounce
-		speed = speed.add(new Vector2D.Polar(bounceDirection,
-				collisionRepulsion));
+	public double getFacing() {
+		return facing;
 	}
 
-	public static void collide(Car one, Car other) {
-		if (one.cooldown > epsilon && other.cooldown > epsilon) {
+	public void setAccelerating(int accel) {
+		if (isDestroyed() && accel != 0) {
 			return;
 		}
-		one.cooldown = collisionCooldown;
-		other.cooldown = collisionCooldown;
-		double speedDiff = one.speed.subtract(other.speed).getMagnitude();
-		Vector2D ab = new Vector2D.Polar(new Vector2D.Cartesian(one.location,
-				other.location).getDirection(), speedDiff);
-		one.speed = one.speed.subtract(ab);
-		other.speed = other.speed.add(ab);
+		accelerating = accel;
+	}
+
+	public void setTurning(int turn) {
+		if (isDestroyed() && turn != 0) {
+			return;
+		}
+		turning = turn;
+	}
+
+	public int getHP() {
+		return hp;
+	}
+
+	public int getMissiles() {
+		return missiles;
+	}
+	
+	public void setMissiles(int missiles) {
+		this.missiles = missiles;
 	}
 }

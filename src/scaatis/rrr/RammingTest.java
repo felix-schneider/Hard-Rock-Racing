@@ -50,4 +50,8 @@ public class RammingTest extends DrivingTest {
 			dummy.collideWith(getTrack());
 		}
 	}
+	
+	protected Car getDummy() {
+		return dummy;
+	}
 }

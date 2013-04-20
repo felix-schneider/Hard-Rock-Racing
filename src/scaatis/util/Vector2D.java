@@ -73,7 +73,7 @@ public abstract class Vector2D {
 
 		@Override
 		public Vector2D add(Vector2D other) {
-			return new Polar(new Cartesian(this).add(new Cartesian(other)));
+			return new Cartesian(this).add(new Cartesian(other));
 		}
 
 		@Override
@@ -165,7 +165,7 @@ public abstract class Vector2D {
 
 		@Override
 		public Vector2D rotate(double theta) {
-			return new Cartesian(new Polar(this).rotate(theta));
+			return new Polar(this).rotate(theta);
 		}
 
 		@Override
