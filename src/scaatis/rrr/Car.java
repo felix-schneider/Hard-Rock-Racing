@@ -1,7 +1,6 @@
 package scaatis.rrr;
 
 import java.awt.Point;
-import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Line2D;
@@ -52,15 +51,18 @@ public class Car implements Updates {
 
 	public static final double collisionRepulsion = 40;
 
+	public static final double collisionCooldown = .5;
+
 	private static final double epsilon = 10e-5;
 
 	private Point2D location;
 	private Vector2D speed;
 	private double facing;
 
-	private boolean accelerating;
+	private int accelerating; // 0 not accelerating, 1 forward, 2 backward
 	private int turning; // 0 - not turning, > 0 turning from positive x to
 							// positive y, < 0 the other way
+	private double cooldown;
 
 	public Car() {
 		this(new Point(), 0);
@@ -70,8 +72,9 @@ public class Car implements Updates {
 		this.location = new Point2D.Double(location.getX(), location.getY());
 		this.facing = facing;
 		speed = new Vector2D.Polar(0, 0);
-		accelerating = false;
+		accelerating = 0;
 		turning = 0;
+		cooldown = 0;
 	}
 
 	public Car(Point2D location, Direction facing) {
@@ -86,11 +89,11 @@ public class Car implements Updates {
 		return new Point((int) location.getX(), (int) location.getY());
 	}
 
-	public boolean isAccelerating() {
+	public int getAccelerating() {
 		return accelerating;
 	}
 
-	public void setAccelerating(boolean accel) {
+	public void setAccelerating(int accel) {
 		accelerating = accel;
 	}
 
@@ -114,6 +117,10 @@ public class Car implements Updates {
 
 	@Override
 	public void update(double delta) {
+		if (cooldown > epsilon) {
+			cooldown -= delta;
+		}
+
 		if (turning != 0) {
 			facing += Math.signum(turning) * turningSpeed
 					* Math.min(1, speed.getMagnitude() / minSpeed) * delta;
@@ -122,8 +129,10 @@ public class Car implements Updates {
 		Vector2D accel = new Vector2D.Cartesian(0, 0);
 
 		// car acceleration
-		if (accelerating) {
+		if (accelerating > 0) {
 			accel = accel.add(new Vector2D.Polar(facing, acceleration));
+		} else if (accelerating < 0) {
+			accel = accel.subtract(new Vector2D.Polar(facing, acceleration));
 		}
 
 		// friction and drag
@@ -156,7 +165,7 @@ public class Car implements Updates {
 		return res;
 	}
 
-	public void collideWith(Track other, Shape intersection) {
+	public void collideWith(Track other) {
 		Point2D center = new Point2D.Double(other.getTrackArea().getBounds2D()
 				.getCenterX(), other.getTrackArea().getBounds2D().getCenterY());
 		Vector2D fromCenter = new Vector2D.Cartesian(center, location);
@@ -188,5 +197,18 @@ public class Car implements Updates {
 		// bounce
 		speed = speed.add(new Vector2D.Polar(bounceDirection,
 				collisionRepulsion));
+	}
+
+	public static void collide(Car one, Car other) {
+		if (one.cooldown > epsilon && other.cooldown > epsilon) {
+			return;
+		}
+		one.cooldown = collisionCooldown;
+		other.cooldown = collisionCooldown;
+		double speedDiff = one.speed.subtract(other.speed).getMagnitude();
+		Vector2D ab = new Vector2D.Polar(new Vector2D.Cartesian(one.location,
+				other.location).getDirection(), speedDiff);
+		one.speed = one.speed.subtract(ab);
+		other.speed = other.speed.add(ab);
 	}
 }

@@ -89,13 +89,17 @@ public class DrivingTest extends JPanel implements KeyListener {
 			timeB = System.nanoTime();
 			double delta = (timeB - timeA) / 1e9;
 			timeA = System.nanoTime();
-			car.update(delta);
-			Area intersection = car.getArea();
-			intersection.intersect(track.getNegative());
-			if (!intersection.isEmpty()) {
-				car.collideWith(track, intersection);
-			}
+			update(delta);
 			repaint();
+		}
+	}
+
+	protected void update(double delta) {
+		car.update(delta);
+		Area intersection = car.getArea();
+		intersection.intersect(track.getNegative());
+		if (!intersection.isEmpty()) {
+			car.collideWith(track);
 		}
 	}
 
@@ -133,12 +137,16 @@ public class DrivingTest extends JPanel implements KeyListener {
 	private boolean up = false;
 	private boolean right = false;
 	private boolean left = false;
+	private boolean down = false;
 
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_UP && !up) {
-			car.setAccelerating(true);
+			car.setAccelerating(1);
 			up = true;
+		} else if (e.getKeyCode() == KeyEvent.VK_DOWN && !down) {
+			car.setAccelerating(-1);
+			down = true;
 		} else if (e.getKeyCode() == KeyEvent.VK_LEFT && !left) {
 			car.setTurning(Direction.LEFT);
 			left = true;
@@ -154,8 +162,19 @@ public class DrivingTest extends JPanel implements KeyListener {
 	@Override
 	public void keyReleased(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_UP) {
-			car.setAccelerating(false);
+			if (down) {
+				car.setAccelerating(-1);
+			} else {
+				car.setAccelerating(0);
+			}
 			up = false;
+		} else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+			if (up) {
+				car.setAccelerating(1);
+			} else {
+				car.setAccelerating(0);
+			}
+			down = false;
 		} else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
 			if (right) {
 				car.setTurning(Direction.RIGHT);
@@ -179,4 +198,11 @@ public class DrivingTest extends JPanel implements KeyListener {
 
 	}
 
+	protected Track getTrack() {
+		return track;
+	}
+
+	protected Car getCar() {
+		return car;
+	}
 }
