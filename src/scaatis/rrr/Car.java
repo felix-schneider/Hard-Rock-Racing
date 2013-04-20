@@ -24,7 +24,7 @@ import scaatis.util.Vector2D;
  * @author Felix Schneider
  * @version
  */
-public class Car implements Updates, CollidesWith<Track> {
+public class Car implements Updates {
 	/**
 	 * The hitbox of the car when facing positive x
 	 */
@@ -32,11 +32,11 @@ public class Car implements Updates, CollidesWith<Track> {
 			45);
 
 	public static final double frontFriction = 100;
-	public static final double sidewaysFriction = 400;
+	public static final double sidewaysFriction = 500;
 
-	public static final double topSpeed = 150;
+	public static final double topSpeed = 200;
 
-	public static final double acceleration = 125 + frontFriction;
+	public static final double acceleration = 140 + frontFriction;
 
 	/**
 	 * Turning speed in radians/second
@@ -50,7 +50,7 @@ public class Car implements Updates, CollidesWith<Track> {
 
 	public static final double collisionRotation = Math.toRadians(15);
 
-	public static final double collisionRepulsion = 80;
+	public static final double collisionRepulsion = 40;
 
 	private static final double epsilon = 10e-5;
 
@@ -156,7 +156,6 @@ public class Car implements Updates, CollidesWith<Track> {
 		return res;
 	}
 
-	@Override
 	public void collideWith(Track other, Shape intersection) {
 		Point2D center = new Point2D.Double(other.getTrackArea().getBounds2D()
 				.getCenterX(), other.getTrackArea().getBounds2D().getCenterY());
@@ -184,8 +183,7 @@ public class Car implements Updates, CollidesWith<Track> {
 		}
 
 		// brake the car
-		speed = speed.scale(Math.abs(Math.sin(facingVector
-				.angleBetween(fromCenter))));
+		speed = speed.scale(Math.abs(Math.sin(speed.angleBetween(fromCenter))));
 
 		// bounce
 		speed = speed.add(new Vector2D.Polar(bounceDirection,
