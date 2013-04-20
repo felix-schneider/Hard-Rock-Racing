@@ -5,14 +5,10 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Line2D;
-import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.Arrays;
-import java.util.List;
 
 import scaatis.util.CollisionTools;
-import scaatis.util.Side;
 import scaatis.util.Vector2D;
 
 /**
@@ -167,84 +163,44 @@ public class Car implements Updates, CollidesWith<Track> {
 				location.getY()));
 		return res;
 	}
-	
-	
-	/**
-	 * Handle a collision between this car and the track.
-	 * 
-	 * The following assumptions are made: The side of the intersection shape
-	 * whose midpoint is closest to the car's center is the collision surface.
-	 * 
-	 * What happens is: The car is instantly turned away from the collision by a
-	 * constant amount
-	 * 
-	 * The car's speed is reduced and possibly inverted, depending on the angle
-	 * of collision
-	 * 
-	 * The car's speed is also increased away from the collision
-	 */
+
 	@Override
 	public void collideWith(Track other, Shape intersection) {
 		if (ccooldown > epsilon) {
 			return;
 		}
 		ccooldown = collisionCooldown;
-		List<Side> sides = CollisionTools.getSides(intersection);
-		if(sides.size() < 3) {
-			return;
+		Point2D center = new Point2D.Double(other.getTrackArea().getBounds2D()
+				.getCenterX(), other.getTrackArea().getBounds2D().getCenterY());
+		Vector2D fromCenter = new Vector2D.Cartesian(center, location);
+		double bounceDirection = fromCenter.getDirection();
+		int turndir = -1;
+		Area test = getArea();
+		test.intersect(other.getOuterArea());
+		if (!test.isEmpty()) {
+			bounceDirection += Math.PI;
+			turndir = 1;
 		}
-		Side collisionSide = CollisionTools.getClosestSide(sides, location);
-		Point2D collisionPoint = collisionSide.getMidPoint();
-		Vector2D collisionNormal = CollisionTools.getNormal(collisionSide,
-				sides.get((sides.indexOf(collisionSide) + 1) % sides.size()),
-				intersection);
-		if (collisionNormal == null) {
-			throw new RuntimeException();
-		}
-		Vector2D facingVector = new Vector2D.Polar(facing, 1);
-		Line2D facingLine = new Line2D.Double(location.getX(), location.getY(),
-				location.getX() + facingVector.getX(), location.getY()
-						+ facingVector.getY());
+		Vector2D facingVector = new Vector2D.Polar(facing, 10);
+		Line2D facingLine = new Line2D.Double(location,
+				facingVector.applyTo(location));
+		turndir *= CollisionTools.isRight(facingLine, center);
 
-		int turndir = -CollisionTools.isRight(facingLine, collisionPoint);
-		Vector2D sideVector = new Vector2D.Polar(facing + 0.5 * Math.PI,
-				hitbox.getHeight() + 2);
-		Line2D sideLine = new Line2D.Double(location.getX(), location.getY(),
-				location.getX() + sideVector.getX(), location.getY()
-						+ sideVector.getY());
-		if (CollisionTools.isRight(sideLine, collisionPoint) > 0) {
-			turndir *= -1;
-		}
-		// turn the car
+		// turn the car, but only if that doesn't cause another collision
+		double oldFacing = facing;
 		facing += turndir * collisionRotation;
-		// facing += facingLine.relativeCCW(collisionPoint) * collisionRotation;
-
-		Vector2D collisionDirection = new Vector2D.Cartesian(
-				collisionPoint.getX() - location.getX(), collisionPoint.getY()
-						- location.getY());
-		// brake the car - more for a frontal collision
-		speed = speed.scale(Math.abs(Math.sin(facingVector
-				.angleBetween(collisionDirection))));
-
-		// bounce the car
-		speed = speed.add(new Vector2D.Polar(collisionNormal.getDirection(),
-				collisionRepulsion));
-
-		// DEBUG:
-		for (Side side : sides) {
-			System.out.println(side.toString());
+		test = getArea();
+		test.intersect(other.getNegative());
+		if (!test.isEmpty()) {
+			facing = oldFacing;
 		}
-		System.out.println();
-		System.out.println("Collision side was " + collisionSide.toString());
-		System.out.println("That is at index " + sides.indexOf(collisionSide));
-		System.out.println("Next is at index "
-				+ (sides.indexOf(collisionSide) + 1) % sides.size());
-		System.out.println("Next in line is "
-				+ sides.get((sides.indexOf(collisionSide) + 1) % sides.size())
-						.toString());
-		System.out.println("CollisionNormal: " + collisionNormal.toString());
-		System.out.println("Turndir: " + turndir);
-		System.out.println("------------------------------------------------------");
-		//System.exit(0);
+
+		// brake the car
+		speed = speed.scale(Math.abs(Math.sin(facingVector
+				.angleBetween(fromCenter))));
+
+		// bounce
+		speed = speed.add(new Vector2D.Polar(bounceDirection,
+				collisionRepulsion));
 	}
 }

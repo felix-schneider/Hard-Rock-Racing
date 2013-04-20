@@ -7,6 +7,8 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,9 @@ public class Track {
 	private Area finishLine;
 	private List<Area> checkPoints;
 	private Direction startDir;
+	private Area innerArea;
+	private Area outerArea;
+	private Area negative;
 
 	public Track(Direction startDir, List<TrackTile> tiles) {
 		this(startDir, convert(tiles));
@@ -66,6 +71,7 @@ public class Track {
 		this.startDir = startDir;
 		this.tiles = tiles;
 		bake();
+		makeNegative();
 	}
 
 	public Area getTrackArea() {
@@ -86,6 +92,18 @@ public class Track {
 
 	public Direction getStartDirection() {
 		return startDir;
+	}
+
+	public Area getInnerArea() {
+		return innerArea;
+	}
+
+	public Area getOuterArea() {
+		return outerArea;
+	}
+
+	public Area getNegative() {
+		return negative;
 	}
 
 	private void bake() {
@@ -124,5 +142,53 @@ public class Track {
 			g.fill(checkPoint);
 		}
 		g.dispose();
+	}
+
+	private void makeNegative() {
+		PathIterator iterator = track.getPathIterator(null);
+		Path2D pathA = new Path2D.Double();
+		Path2D pathB = new Path2D.Double();
+		Path2D current = pathA;
+		boolean firstDone = false;
+		for (; !iterator.isDone(); iterator.next()) {
+			double[] pts = new double[6];
+			int type = iterator.currentSegment(pts);
+			if (type == PathIterator.SEG_MOVETO) {
+				if (!firstDone) {
+					firstDone = true;
+				} else {
+					current = pathB;
+				}
+				current.moveTo(pts[0], pts[1]);
+			} else if (type == PathIterator.SEG_LINETO) {
+				current.lineTo(pts[0], pts[1]);
+			} else if (type == PathIterator.SEG_QUADTO) {
+				current.quadTo(pts[0], pts[1], pts[2], pts[3]);
+			} else if (type == PathIterator.SEG_CUBICTO) {
+				current.curveTo(pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]);
+			} else if (type == PathIterator.SEG_CLOSE) {
+				current.closePath();
+			}
+		}
+		Area areaA = new Area(pathA);
+		Area areaB = new Area(pathB);
+		Area areaC = new Area(areaA);
+		areaC.intersect(areaB);
+		if (areaC.equals(areaB)) {
+			innerArea = areaB;
+			outerArea = areaA;
+		} else if (areaC.equals(areaA)) {
+			innerArea = areaA;
+			outerArea = areaB;
+		} else {
+			throw new IllegalStateException();
+		}
+		Rectangle bounds = new Rectangle(track.getBounds());
+		bounds.grow(10, 10);
+		Area boundsArea = new Area(bounds);
+		boundsArea.subtract(outerArea);
+		outerArea = boundsArea;
+		negative = new Area(boundsArea);
+		negative.add(innerArea);
 	}
 }

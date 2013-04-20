@@ -40,6 +40,10 @@ public abstract class Vector2D {
 		return "(" + getX() + ", " + getY() + ")";
 	}
 
+	public Point2D applyTo(Point2D what) {
+		return new Point2D.Double(what.getX() + getX(), what.getY() + getY());
+	}
+
 	public static class Polar extends Vector2D {
 		private double direction;
 		private double magnitude;

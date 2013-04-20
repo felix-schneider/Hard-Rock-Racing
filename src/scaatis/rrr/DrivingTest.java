@@ -5,12 +5,9 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -29,8 +26,8 @@ public class DrivingTest extends JPanel implements KeyListener {
 	private Track track;
 	private Car car;
 	private boolean running;
-	private double diagonal;
-	private Area negative;
+
+	// private double diagonal;
 
 	public DrivingTest() {
 		ArrayList<TrackTile> tiles = new ArrayList<>();
@@ -57,13 +54,9 @@ public class DrivingTest extends JPanel implements KeyListener {
 				.getFinishLine().getBounds().y + 113);
 		car = new Car(start, track.getStartDirection());
 		running = false;
-		double w = track.getTrackArea().getBounds2D().getWidth();
-		double h = track.getTrackArea().getBounds2D().getHeight();
-		diagonal = Math.sqrt(w * w + h * h);
-		Rectangle rectangle = new Rectangle(track.getTrackArea().getBounds());
-		rectangle.grow(10, 10);
-		negative = new Area(rectangle);
-		negative.subtract(track.getTrackArea());
+		// double w = track.getTrackArea().getBounds2D().getWidth();
+		// double h = track.getTrackArea().getBounds2D().getHeight();
+		// diagonal = Math.sqrt(w * w + h * h);
 	}
 
 	@Override
@@ -98,7 +91,7 @@ public class DrivingTest extends JPanel implements KeyListener {
 			timeA = System.nanoTime();
 			car.update(delta);
 			Area intersection = car.getArea();
-			intersection.intersect(negative);
+			intersection.intersect(track.getNegative());
 			if (!intersection.isEmpty()) {
 				car.collideWith(track, intersection);
 			}
