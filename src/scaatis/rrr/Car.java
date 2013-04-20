@@ -48,11 +48,9 @@ public class Car implements Updates, CollidesWith<Track> {
 	 */
 	public static final double minSpeed = 50;
 
-	public static final double collisionRotation = Math.toRadians(10);
+	public static final double collisionRotation = Math.toRadians(15);
 
 	public static final double collisionRepulsion = 80;
-
-	private static final double collisionCooldown = .06;
 
 	private static final double epsilon = 10e-5;
 
@@ -63,7 +61,6 @@ public class Car implements Updates, CollidesWith<Track> {
 	private boolean accelerating;
 	private int turning; // 0 - not turning, > 0 turning from positive x to
 							// positive y, < 0 the other way
-	private double ccooldown;
 
 	public Car() {
 		this(new Point(), 0);
@@ -75,7 +72,6 @@ public class Car implements Updates, CollidesWith<Track> {
 		speed = new Vector2D.Polar(0, 0);
 		accelerating = false;
 		turning = 0;
-		ccooldown = 0;
 	}
 
 	public Car(Point2D location, Direction facing) {
@@ -118,10 +114,6 @@ public class Car implements Updates, CollidesWith<Track> {
 
 	@Override
 	public void update(double delta) {
-		if (ccooldown > epsilon) {
-			ccooldown -= delta;
-		}
-
 		if (turning != 0) {
 			facing += Math.signum(turning) * turningSpeed
 					* Math.min(1, speed.getMagnitude() / minSpeed) * delta;
@@ -166,10 +158,6 @@ public class Car implements Updates, CollidesWith<Track> {
 
 	@Override
 	public void collideWith(Track other, Shape intersection) {
-		if (ccooldown > epsilon) {
-			return;
-		}
-		ccooldown = collisionCooldown;
 		Point2D center = new Point2D.Double(other.getTrackArea().getBounds2D()
 				.getCenterX(), other.getTrackArea().getBounds2D().getCenterY());
 		Vector2D fromCenter = new Vector2D.Cartesian(center, location);
