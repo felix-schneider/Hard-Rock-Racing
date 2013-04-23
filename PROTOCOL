@@ -23,7 +23,11 @@ the connection is dropped. It has the following form:
  "name":NAME, // The display name of the AI. Must be less than 12 letters
  "character":CHARACTER,
  "cartype":CARTYPE
+ "tracktiled":true/false
 }
+The tracktiled field is optional. If set to true, the map will not be transmitted
+to you as one big image, but rather as a sequence of tiles, which the ai can
+set together as it pleases.
 In the "character" field, an AI can state a preference for which character it
 wants to use. This determines which portrait the AI uses as well as the color of
 the car. If the character is already used, a random one will be assigned. 
@@ -73,10 +77,14 @@ TRACK
 The track object looks as follows
 
 {"message":"track",
- "width": WIDTH
- "height":HEIGHT
+ "tiled":false,
+ "width": WIDTH,
+ "height":HEIGHT,
+ "startdir":"UP/DOWN/LEFT/RIGHT",
  "data":[NUMBER, NUMBER, ... ]
 }
+The startdir field describes which direction the players will face when starting.
+DOWN is defined as negative y, LEFT as negative x.
 "data" is a one-dimensional array representing the track. It can be thought of
 as an image. The point x, y on the track is in x + y * width in the data array. 
 Note that this might be very long.
@@ -84,6 +92,17 @@ Areas outside the track have the value 0x000000
 Areas inside the track that are not the finish line have the value 0xffffff
 The finish line has the value 0x00ff00
 
+{"message":"track",
+ "tiled":true,
+ "tiles":[TILE, ...]
+}
+
+{"message":"tile",
+ "type":"Curve/Straight/FinishLine"
+ "orientation":"UP/DOWN/LEFT/RIGHT"
+}
+The starting direction is the orientation of the finish tile. Other than that,
+the finish tile is the same as a straight tile.
 
 GAMESTATE
 ---------
@@ -175,6 +194,26 @@ all players:
 }
 WINNER etc. are PLAYER objects
 
+OBSERVER
+--------
+A client can connect to the server as observer. This must be done at the
+handshake:
+{"message":"connect",
+ "type":"observer"
+}
+An observer is sent the same gamestates and information as players, but does not
+participate in the game.
+
+ACTION
+------
+The ai communicates to the server that it wants its car to take an action in
+the following format:
+{"message":"action",
+ "type":"turnleft/turnright/accelerate/stopaccelrate/stopturn/firemissile",
+}
+This package is resent to all players (including the one who sent it) with a 
+"playername":name field added.
+
 REQUEST
 -------
 An ai can request the value of a game constant at any time. A request takes the
@@ -188,13 +227,3 @@ the response:
 }
 constants are (this list is not comprehensive):
 can't be bothered right now...
-
-OBSERVER
---------
-A client can connect to the server as observer. This must be done at the
-handshake:
-{"message":"connect",
- "type":"observer"
-}
-An observer is sent the same gamestates and information as players, but does not
-participate in the game.

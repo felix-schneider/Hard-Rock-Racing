@@ -1,12 +1,15 @@
 package scaatis.rrr.tracktiles;
 
 import java.awt.Point;
-import java.awt.Shape;
+import java.awt.geom.Area;
+
+import org.json.JSONObject;
 
 import scaatis.rrr.Direction;
+import scaatis.rrr.JSONable;
 import scaatis.rrr.TrackState;
 
-public abstract class TrackTile {
+public abstract class TrackTile implements JSONable {
 	
 	public static final int SEGMENT_LENGTH = 45;
 	public static final int TRACK_WIDTH = SEGMENT_LENGTH * 5;
@@ -18,7 +21,7 @@ public abstract class TrackTile {
 		this.orientation = orientation;
 	}
 
-	public abstract Shape getShape();
+	public abstract Area getArea();
 	public abstract TrackState getConnect(Direction direction);
 	public abstract Point getRelativeConnect(Direction direction);
 	public abstract boolean checkDirection(Direction direction);
@@ -40,5 +43,12 @@ public abstract class TrackTile {
 		return orientation;
 	}
 	
-	
+	@Override
+	public JSONObject toJSON() {
+		JSONObject obj = new JSONObject();
+		obj.put("message", "tile");
+		obj.put("type", getClass().getSimpleName());
+		obj.put("orientation", getOrientation().toString());
+		return obj;
+	}
 }

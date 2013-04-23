@@ -13,14 +13,14 @@ public class Missile extends GameObject implements Collides {
 	public static final int damage = 2;
 	public static final Rectangle hitbox = new Rectangle(20, 8);
 
-	private Car shooter;
+	private Player shooter;
 	private Point2D startPoint;
 
-	public Missile(Car shooter) {
-		super(shooter.getLocation(), new Vector2D.Polar(shooter.getFacing(),
-				speed));
+	public Missile(Player shooter) {
+		super(shooter.getCar().getLocation(), new Vector2D.Polar(shooter
+				.getCar().getFacing(), speed));
 		this.shooter = shooter;
-		startPoint = shooter.getLocation();
+		startPoint = shooter.getCar().getLocation();
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class Missile extends GameObject implements Collides {
 	}
 
 	public void collideWith(Car other) {
-		if (other != shooter) {
+		if (other != shooter.getCar()) {
 			other.damage(damage);
 			destroy();
 		}
@@ -48,5 +48,9 @@ public class Missile extends GameObject implements Collides {
 		res.transform(AffineTransform.getTranslateInstance(
 				getLocation().getX(), getLocation().getY()));
 		return res;
+	}
+
+	public Player getShooter() {
+		return shooter;
 	}
 }

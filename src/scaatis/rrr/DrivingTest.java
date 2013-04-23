@@ -50,8 +50,9 @@ public class DrivingTest extends JPanel implements KeyListener {
 		}
 		tiles.add(new Curve(Direction.DOWN));
 		track = new Track(Direction.LEFT, tiles);
-		Point start = new Point(track.getFinishLine().getBounds().x + 90, track
-				.getFinishLine().getBounds().y + 113);
+		Area finish = track.getFinishLine().getArea();
+		Point start = new Point(finish.getBounds().x + 90,
+				finish.getBounds().y + 113);
 		car = new Car(start, track.getStartDirection());
 		running = false;
 		// double w = track.getTrackArea().getBounds2D().getWidth();

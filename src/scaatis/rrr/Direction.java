@@ -60,4 +60,5 @@ public enum Direction {
 			return 0;
 		}
 	}
+
 }

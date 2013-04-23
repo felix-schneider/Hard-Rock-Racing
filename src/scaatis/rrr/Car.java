@@ -7,6 +7,9 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
+import scaatis.rrr.event.CheckPointEvent;
+import scaatis.rrr.event.CheckPointListener;
+import scaatis.rrr.tracktiles.CheckPoint;
 import scaatis.util.CollisionTools;
 import scaatis.util.Vector2D;
 
@@ -55,7 +58,6 @@ public class Car extends GameObject implements Collides {
 	 */
 	public static final double damageThreshHold = 90;
 	public static final int maxHP = 6;
-	public static final int maxMissiles = 3;
 
 	private static final double epsilon = 10e-5;
 
@@ -66,7 +68,6 @@ public class Car extends GameObject implements Collides {
 							// positive y, < 0 the other way
 	private double cooldown;
 	private int hp;
-	private int missiles;
 
 	public Car() {
 		this(new Point(), 0);
@@ -79,7 +80,6 @@ public class Car extends GameObject implements Collides {
 		turning = 0;
 		cooldown = 0;
 		hp = maxHP;
-		missiles = maxMissiles;
 	}
 
 	public Car(Point2D location, Direction facing) {
@@ -138,9 +138,6 @@ public class Car extends GameObject implements Collides {
 	}
 
 	public void collideWith(Track other) {
-		if (isDestroyed()) {
-			return;
-		}
 		Point2D center = new Point2D.Double(other.getTrackArea().getBounds2D()
 				.getCenterX(), other.getTrackArea().getBounds2D().getCenterY());
 		Vector2D fromCenter = new Vector2D.Cartesian(center, getLocation());
@@ -175,6 +172,15 @@ public class Car extends GameObject implements Collides {
 				new Vector2D.Polar(bounceDirection, collisionRepulsion)));
 	}
 
+	public void collideWith(CheckPoint other) {
+		CheckPointListener[] ls = getListeners().getListeners(
+				CheckPointListener.class);
+		CheckPointEvent event = new CheckPointEvent(this, other);
+		for (CheckPointListener listener : ls) {
+			listener.checkPoint(event);
+		}
+	}
+
 	public static void collide(Car one, Car other) {
 		if (one.cooldown > epsilon && other.cooldown > epsilon) {
 			return;
@@ -199,14 +205,6 @@ public class Car extends GameObject implements Collides {
 		}
 	}
 
-	public Missile fireMissile() {
-		if (missiles == 0) {
-			return null;
-		}
-		missiles--;
-		return new Missile(this);
-	}
-
 	public boolean damage(int damage) {
 		hp -= damage;
 		if (hp <= 0) {
@@ -214,7 +212,7 @@ public class Car extends GameObject implements Collides {
 			setAccelerating(0);
 			destroy();
 		}
-		return isDestroyed();
+		return hp <= 0;
 	}
 
 	public void setTurning(Direction dir) {
@@ -225,6 +223,14 @@ public class Car extends GameObject implements Collides {
 		} else {
 			turning = 0;
 		}
+	}
+
+	public void addCheckPointListener(CheckPointListener listener) {
+		getListeners().add(CheckPointListener.class, listener);
+	}
+
+	public void removeCheckPointListener(CheckPointListener listener) {
+		getListeners().remove(CheckPointListener.class, listener);
 	}
 
 	public void stopTurning() {
@@ -244,28 +250,14 @@ public class Car extends GameObject implements Collides {
 	}
 
 	public void setAccelerating(int accel) {
-		if (isDestroyed() && accel != 0) {
-			return;
-		}
 		accelerating = accel;
 	}
 
 	public void setTurning(int turn) {
-		if (isDestroyed() && turn != 0) {
-			return;
-		}
 		turning = turn;
 	}
 
 	public int getHP() {
 		return hp;
-	}
-
-	public int getMissiles() {
-		return missiles;
-	}
-	
-	public void setMissiles(int missiles) {
-		this.missiles = missiles;
 	}
 }

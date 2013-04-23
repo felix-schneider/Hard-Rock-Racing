@@ -2,7 +2,6 @@ package scaatis.rrr.tracktiles;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
@@ -37,7 +36,7 @@ public class Curve extends TrackTile {
 	}
 
 	@Override
-	public Shape getShape() {
+	public Area getArea() {
 		Area res;
 		switch (getOrientation()) {
 		case DOWN:

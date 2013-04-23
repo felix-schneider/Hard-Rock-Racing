@@ -2,7 +2,7 @@ package scaatis.rrr.tracktiles;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.geom.Area;
 
 import scaatis.rrr.Direction;
 import scaatis.rrr.TrackState;
@@ -19,7 +19,7 @@ public class Straight extends TrackTile {
 	}
 
 	@Override
-	public Shape getShape() {
+	public Area getArea() {
 		int x = getLocation().x;
 		int y = getLocation().y;
 		Rectangle rect;
@@ -30,13 +30,12 @@ public class Straight extends TrackTile {
 			rect = new Rectangle(horizontal);
 		}
 		rect.setLocation(x, y);
-		return rect;
+		return new Area(rect);
 	}
 
 	@Override
 	public boolean checkDirection(Direction direction) {
-		return direction == getOrientation()
-				|| direction == getOrientation().opposite();
+		return direction == getOrientation();
 	}
 
 	@Override

@@ -10,19 +10,23 @@ import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import org.json.JSONObject;
 
 import scaatis.rrr.tracktiles.CheckPoint;
 import scaatis.rrr.tracktiles.FinishLine;
 import scaatis.rrr.tracktiles.TrackTile;
 
-public class Track implements Collides {
+public class Track implements Collides, JSONable {
 	private TrackTile[] tiles;
 	private BufferedImage image;
 	private Area track;
-	private Area finishLine;
-	private List<Area> checkPoints;
+	private FinishLine finishLine;
+	private List<CheckPoint> checkPoints;
 	private Direction startDir;
 	private Area innerArea;
 	private Area outerArea;
@@ -41,20 +45,20 @@ public class Track implements Collides {
 	public Track(Direction startDir, TrackTile... tiles) {
 		TrackState startstate = new TrackState(new Point(), startDir);
 		TrackState state = startstate;
-		boolean hasFinish = false;
-		int checkpoints = 0;
+		checkPoints = new ArrayList<>();
+		finishLine = null;
 
 		for (TrackTile tile : tiles) {
 			if (tile instanceof FinishLine) {
-				if (!hasFinish) {
-					hasFinish = true;
+				if (finishLine == null) {
+					finishLine = (FinishLine) tile;
 				} else {
 					throw new IllegalArgumentException(
 							"Track contains several start/finish lines.");
 				}
-			} 
+			}
 			if (tile instanceof CheckPoint) {
-				checkpoints++;
+				checkPoints.add((CheckPoint) tile);
 			}
 			tile.calcLocation(state);
 			state = tile.getConnect(state.getDirection());
@@ -62,11 +66,11 @@ public class Track implements Collides {
 		if (!state.equals(startstate)) {
 			throw new IllegalArgumentException("Track is not a closed circuit.");
 		}
-		if (!hasFinish) {
+		if (finishLine == null) {
 			throw new IllegalArgumentException(
 					"Track contains no start/finish line.");
 		}
-		if (checkpoints <= 1) {
+		if (checkPoints.size() <= 1) {
 			throw new IllegalArgumentException("Track contains no checkpoints.");
 		}
 		this.startDir = startDir;
@@ -74,7 +78,7 @@ public class Track implements Collides {
 		bake();
 		makeNegative();
 	}
-	
+
 	@Override
 	public Area getArea() {
 		return getNegative();
@@ -84,11 +88,11 @@ public class Track implements Collides {
 		return track;
 	}
 
-	public Area getFinishLine() {
+	public FinishLine getFinishLine() {
 		return finishLine;
 	}
 
-	public List<Area> getCheckpoints() {
+	public List<CheckPoint> getCheckpoints() {
 		return new ArrayList<>(checkPoints);
 	}
 
@@ -114,38 +118,38 @@ public class Track implements Collides {
 
 	private void bake() {
 		track = new Area();
-		finishLine = new Area();
-		checkPoints = new ArrayList<>();
 		for (TrackTile t : tiles) {
-			Area a = new Area(t.getShape());
-			track.add(a);
-			if (t instanceof FinishLine) {
-				finishLine.add(a);
-			} else if (t instanceof CheckPoint) {
-				checkPoints.add(a);
-			}
+			track.add(t.getArea());
 		}
 		Rectangle bounds = track.getBounds();
+
 		track.transform(AffineTransform.getTranslateInstance(-bounds.x,
 				-bounds.y));
-		finishLine.transform(AffineTransform.getTranslateInstance(-bounds.x,
-				-bounds.y));
-		for (Area checkPoint : checkPoints) {
-			checkPoint.transform(AffineTransform.getTranslateInstance(
-					-bounds.x, -bounds.y));
+		// calculate final location for tiles
+		TrackState state = new TrackState(new Point((int) -bounds.getX(),
+				(int) -bounds.getY()), startDir);
+		for (TrackTile t : tiles) {
+			t.calcLocation(state);
+			state = t.getConnect(state.getDirection());
 		}
+		track = new Area();
 		image = new BufferedImage(bounds.width, bounds.height,
 				BufferedImage.TYPE_INT_RGB);
 		Graphics2D g = image.createGraphics();
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_OFF);
 		g.setColor(Color.white);
-		g.fill(track);
+		for (TrackTile t : tiles) {
+			track.add(t.getArea());
+			g.fill(t.getArea());
+		}
 		g.setColor(Color.green);
-		g.fill(finishLine);
+		g.fill(finishLine.getArea());
 		g.setColor(Color.yellow);
-		for (Area checkPoint : checkPoints) {
-			g.fill(checkPoint);
+		for (CheckPoint checkPoint : checkPoints) {
+			if (checkPoint != finishLine) {
+				g.fill(checkPoint.getArea());
+			}
 		}
 		g.dispose();
 	}
@@ -196,5 +200,30 @@ public class Track implements Collides {
 		outerArea = boundsArea;
 		negative = new Area(boundsArea);
 		negative.add(innerArea);
+	}
+
+	@Override
+	public JSONObject toJSON() {
+		return toJSON(false);
+	}
+
+	public JSONObject toJSON(boolean asTiles) {
+		JSONObject obj = new JSONObject();
+		obj.put("message", "track");
+		obj.put("tiled", asTiles);
+		if (asTiles) {
+			List<JSONObject> tiled = new ArrayList<>();
+			for (TrackTile tile : tiles) {
+				tiled.add(tile.toJSON());
+			}
+			obj.put("tiles", tiled);
+		} else {
+			obj.put("width", image.getWidth());
+			obj.put("height", image.getHeight());
+			obj.put("startdir", startDir.toString());
+			obj.put("values", Arrays.asList(((DataBufferByte) image.getRaster()
+					.getDataBuffer()).getData()));
+		}
+		return obj;
 	}
 }
