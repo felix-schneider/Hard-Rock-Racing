@@ -5,6 +5,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 
+import org.json.JSONObject;
+
 import scaatis.util.Vector2D;
 
 public class Missile extends GameObject implements Collides {
@@ -52,5 +54,13 @@ public class Missile extends GameObject implements Collides {
 
 	public Player getShooter() {
 		return shooter;
+	}
+	
+	@Override
+	public JSONObject toJSON() {
+		JSONObject obj = super.toJSON();
+		obj.put("message", "misile");
+		obj.put("shooter", shooter.getName());
+		return obj;
 	}
 }

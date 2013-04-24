@@ -18,12 +18,11 @@ public enum RaceCharacter {
 
 	public static RaceCharacter getFromName(String name) {
 		RaceCharacter[] val = RaceCharacter.values();
-		RaceCharacter res = null;
 		for (RaceCharacter ch : val) {
 			if (ch.getName().equals(name)) {
-				res = ch;
+				return ch;
 			}
 		}
-		return res;
+		return null;
 	}
 }

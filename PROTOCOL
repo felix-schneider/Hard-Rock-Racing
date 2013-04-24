@@ -3,7 +3,7 @@ Hard Rock Racing communication protocol:
 
 TRANSPORT
 ---------
-The transport protocol used is line-based TCP. The server accepts UNIX-style
+The transport protocol used is line-based TCP on port 1993. The server accepts UNIX-style
 line endings (\n) and windows-style line endings (\r\n). When reading from the
 socket, make sure that you don't limit the size of your lines, as some packages
 (e.g. the transmission of the map) may end up rather large.
@@ -59,7 +59,9 @@ The handshake will fail if the chosen name is already in use.
 GAMESTART
 ---------
 Only four racers can race at a time. By connecting, you queue up and will race
-when it is your turn.
+when it is your turn. Only players who are currently racing and observers
+receive gamestates and other updates on the race. But other players can still
+send requests.
 Before the race starts, a gamestart package is sent. It is also sent to any
 player joining while the race is in progress.
 
@@ -194,7 +196,12 @@ all players:
 {"message":"raceover",
  "placement":[WINNER, SECOND, THIRD, LOSER]
 }
-WINNER etc. are PLAYER objects
+WINNER etc. are the names of players
+
+RACEABORTED
+-----------
+The race was aborted, usually because too many players disconnected.
+{"message":"raceaborted"}
 
 OBSERVER
 --------

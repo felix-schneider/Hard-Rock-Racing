@@ -60,6 +60,7 @@ public class Car extends GameObject implements Collides {
 	public static final int maxHP = 6;
 
 	private static final double epsilon = 10e-5;
+	private static int idtotal = 1;
 
 	private double facing;
 
@@ -68,6 +69,7 @@ public class Car extends GameObject implements Collides {
 							// positive y, < 0 the other way
 	private double cooldown;
 	private int hp;
+	private int id;
 
 	public Car() {
 		this(new Point(), 0);
@@ -80,6 +82,7 @@ public class Car extends GameObject implements Collides {
 		turning = 0;
 		cooldown = 0;
 		hp = maxHP;
+		id = idtotal++;
 	}
 
 	public Car(Point2D location, Direction facing) {
@@ -244,6 +247,10 @@ public class Car extends GameObject implements Collides {
 	public int getAccelerating() {
 		return accelerating;
 	}
+	
+	public int getTurning() {
+		return turning;
+	}
 
 	public double getFacing() {
 		return facing;
@@ -259,5 +266,9 @@ public class Car extends GameObject implements Collides {
 
 	public int getHP() {
 		return hp;
+	}
+	
+	public int getID() {
+		return id;
 	}
 }

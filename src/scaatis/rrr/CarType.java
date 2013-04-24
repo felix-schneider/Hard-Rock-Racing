@@ -15,13 +15,12 @@ public enum CarType {
 	}
 
 	public static CarType getFromString(String name) {
-		CarType[] val = values();
-		CarType res = null;
+		CarType[] val = CarType.values();
 		for (CarType type : val) {
 			if (type.getName().equals(name)) {
-				res = type;
+				return type;
 			}
 		}
-		return res;
+		return null;
 	}
 }

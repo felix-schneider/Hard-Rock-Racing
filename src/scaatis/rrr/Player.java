@@ -214,7 +214,11 @@ public class Player {
 		if (isObserver()) {
 			return "Observer";
 		}
-		return "Player " + name + ", impersonating " + character.getName()
+		RaceCharacter ch = character;
+		if(ch == null) {
+			ch = preferredCharacter;
+		}
+		return "Player " + name + ", impersonating " + ch.getName()
 				+ ", driving " + carType.getName();
 	}
 }

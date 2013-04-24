@@ -32,7 +32,7 @@ public class CollisionTest extends JPanel {
 	public CollisionTest() {
 		track = new Track(Direction.LEFT, new FinishLine(Direction.LEFT),
 				new Straight(Direction.LEFT), new Curve(Direction.LEFT),
-				new CheckPoint(Direction.UP), new Straight(Direction.DOWN),
+				new CheckPoint(Direction.UP), new Straight(Direction.UP),
 				new Curve(Direction.UP), new Straight(Direction.RIGHT),
 				new CheckPoint(Direction.RIGHT), new Curve(Direction.RIGHT),
 				new Straight(Direction.DOWN), new Straight(Direction.DOWN),

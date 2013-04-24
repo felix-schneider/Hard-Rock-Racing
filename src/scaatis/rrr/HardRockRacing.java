@@ -23,6 +23,8 @@ public class HardRockRacing {
 	private HardRockProtocol protocol;
 	private RaceState state;
 	private List<Player> racers;
+	private List<Missile> missiles;
+	private double timer;
 
 	private boolean running;
 	
@@ -35,6 +37,7 @@ public class HardRockRacing {
 		currentTrack = null;
 		protocol = new HardRockProtocol(this);
 		state = RaceState.WAITING;
+		timer = 0;
 	}
 	
 	public HardRockRacing(List<String> maps, boolean loop) {
@@ -49,6 +52,7 @@ public class HardRockRacing {
 		}
 		protocol = new HardRockProtocol(this);
 		state = RaceState.WAITING;
+		timer = 0;
 	}
 
 	public void startNewRace() {
@@ -61,6 +65,14 @@ public class HardRockRacing {
 		}
 		pause = pauseBeforeRace;
 		protocol.mapChange();
+	}
+	
+	public void abortRace() {
+		// TODO
+	}
+	
+	public void dropPlayer(Player player) {
+		// TODO
 	}
 
 //	public void objectDestroyed(DestroyedEvent e) {
@@ -116,6 +128,18 @@ public class HardRockRacing {
 	
 	public Track getCurrentTrack() {
 		return currentTrack;
+	}
+	
+	public double getTimer() {
+		return timer;
+	}
+	
+	public List<Missile> getMissiles() {
+		return missiles;
+	}
+	
+	public RaceState getState() {
+		return state;
 	}
 	
 	public static void main(String[] args) {

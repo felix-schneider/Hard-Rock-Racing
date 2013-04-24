@@ -4,11 +4,13 @@ import java.awt.geom.Point2D;
 
 import javax.swing.event.EventListenerList;
 
+import org.json.JSONObject;
+
 import scaatis.rrr.event.DestroyedEvent;
 import scaatis.rrr.event.DestroyedListener;
 import scaatis.util.Vector2D;
 
-public class GameObject {
+public class GameObject implements JSONable {
 	private Point2D location;
 	private Vector2D speed;
 	private EventListenerList listeners;
@@ -65,5 +67,15 @@ public class GameObject {
 	
 	protected EventListenerList getListeners() {
 		return listeners;
+	}
+
+	@Override
+	public JSONObject toJSON() {
+		JSONObject obj = new JSONObject();
+		obj.put("locationX", getLocation().getX());
+		obj.put("locationY", getLocation().getY());
+		obj.put("speedX", getSpeed().getX());
+		obj.put("speedY", getSpeed().getY());
+		return obj;
 	}
 }
