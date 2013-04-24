@@ -65,6 +65,7 @@ player joining while the race is in progress.
 
 {"message":"gamestart",
  "players":[PLAYER1, PLAYER2, PLAYER3, PLAYER4],
+ "laps":laps,
  "track":TRACK
 }
 PLAYER1 through PLAYER4 are the competing AIs (see below). If the name of your
@@ -142,6 +143,7 @@ CAR
  "speedY":speedY,
  "facing":facing	// in radians, 0 is towards positive x
  "missiles":missiles,
+ "lapscomplete":lapscomplete,
  "accelerating":true/false,
  "turning":TURNING
 }
@@ -164,7 +166,7 @@ LAPCOMPLETE
 When a player completes a lap, all players are sent a lapcomplete package:
 {"message":"lapcomplete",
  "player":playername,
- "lapsLeft":lapsleft //full laps the player has yet to complete
+ "lapsleft":lapsleft //full laps the player has yet to complete
 }
 
 MISSILEHIT
@@ -209,10 +211,10 @@ ACTION
 The ai communicates to the server that it wants its car to take an action in
 the following format:
 {"message":"action",
- "type":"turnleft/turnright/accelerate/stopaccelrate/stopturn/firemissile",
+ "type":"turnleft/turnright/accelerate/stopaccelerate/stopturn/firemissile",
 }
 This package is resent to all players (including the one who sent it) with a 
-"playername":name field added.
+"player":name field added.
 
 REQUEST
 -------
@@ -223,7 +225,31 @@ format:
 }
 the response:
 {"message":"constant",
+ "name":name
  "value":value //or null if not found
 }
-constants are (this list is not comprehensive):
-can't be bothered right now...
+Note the value will be returned as a string
+constants are (this list may not be complete):
+car.hitbox.width
+car.hitbox.height
+car.maxfriction
+car.minfriction
+car.acceleration
+car.topspeed
+car.turnspeed
+car.minturnspeed
+car.collision.rotation
+car.collision.bounce
+car.collision.mindamagespeed
+car.hp
+missile.hitbox.width
+missile.hitbox.height
+missile.speed
+missile.range
+missile.damage
+player.maxmissiles
+race.laps
+track.straight.legnth
+track.straight.width
+track.curve.innerradius
+track.curve.outerradius
