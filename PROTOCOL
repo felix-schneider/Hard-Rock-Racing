@@ -116,8 +116,9 @@ start of the race.
 
 {"message":"gamestate",
  "time":SERVERTIME // time since the race started, in seconds
- "cars":[CAR1, CAR2, ...]
- "missiles":[MISSILE1, ...]
+ "cars":[CAR1, CAR2, ...],
+ "missiles":[MISSILE1, ...],
+ "mines":[MINE1, ...]
 }
 Note there will at most be 4 Cars on the track at any time.
 
@@ -145,6 +146,8 @@ CAR
  "speedY":speedY,
  "facing":facing	// in radians, 0 is towards positive x
  "missiles":missiles,
+ "boosts":boosts,
+ "mines":mines,
  "lapscomplete":lapscomplete,
  "accelerating":true/false,
  "turning":TURNING
@@ -163,6 +166,13 @@ MISSILE
  "shooter":playername
 }
 
+MINE
+----
+
+{"message":"mine",
+ "locationX":locX,
+ "locationY":locY}
+
 LAPCOMPLETE
 -----------
 When a player completes a lap, all players are sent a lapcomplete package:
@@ -178,6 +188,13 @@ missilehit package:
 {"message":"missilehit",
  "target":playername,
  "shooter":playername
+}
+
+MINEHIT
+-------
+When a player drives into a mine, all players get a message
+{"message":"minehit",
+ "target":playername
 }
 
 DESTROYED
@@ -218,8 +235,17 @@ ACTION
 The ai communicates to the server that it wants its car to take an action in
 the following format:
 {"message":"action",
- "type":"turnleft/turnright/accelerate/stopaccelerate/stopturn/firemissile",
+ "type":type,
 }
+type is one of:
+turnleft
+turnright
+accelerate
+stopaccelerate
+stopturning
+firemissile
+boost
+mine
 This package is resent to all players (including the one who sent it) with a 
 "player":name field added.
 

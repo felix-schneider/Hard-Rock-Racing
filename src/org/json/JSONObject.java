@@ -104,7 +104,8 @@ public class JSONObject {
      * JSONObjects will be avoided by using a key pool to manage unique key
      * string objects. This is used by JSONObject.put(string, object).
      */
-    private static HashMap keyPool = new HashMap(keyPoolSize);
+    @SuppressWarnings("rawtypes")
+	private static HashMap keyPool = new HashMap(keyPoolSize);
 
     /**
      * JSONObject.NULL is equivalent to the value that JavaScript calls null,
@@ -148,7 +149,8 @@ public class JSONObject {
     /**
      * The map where the JSONObject's properties are kept.
      */
-    private final Map map;
+    @SuppressWarnings("rawtypes")
+	private final Map map;
 
     /**
      * It is sometimes more convenient and less ambiguous to have a
@@ -161,7 +163,8 @@ public class JSONObject {
     /**
      * Construct an empty JSONObject.
      */
-    public JSONObject() {
+    @SuppressWarnings("rawtypes")
+	public JSONObject() {
         this.map = new HashMap();
     }
 
@@ -252,7 +255,8 @@ public class JSONObject {
      *            the JSONObject.
      * @throws JSONException
      */
-    public JSONObject(Map map) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public JSONObject(Map map) {
         this.map = new HashMap();
         if (map != null) {
             Iterator i = map.entrySet().iterator();
@@ -306,7 +310,8 @@ public class JSONObject {
      *            An array of strings, the names of the fields to be obtained
      *            from the object.
      */
-    public JSONObject(Object object, String names[]) {
+    @SuppressWarnings("rawtypes")
+	public JSONObject(Object object, String names[]) {
         this();
         Class c = object.getClass();
         for (int i = 0; i < names.length; i += 1) {
@@ -344,7 +349,8 @@ public class JSONObject {
      * @throws JSONException
      *             If any JSONExceptions are detected.
      */
-    public JSONObject(String baseName, Locale locale) throws JSONException {
+    @SuppressWarnings("rawtypes")
+	public JSONObject(String baseName, Locale locale) throws JSONException {
         this();
         ResourceBundle bundle = ResourceBundle.getBundle(baseName, locale,
                 Thread.currentThread().getContextClassLoader());
@@ -617,7 +623,8 @@ public class JSONObject {
      *
      * @return An array of field names, or null if there are no names.
      */
-    public static String[] getNames(JSONObject jo) {
+    @SuppressWarnings("rawtypes")
+	public static String[] getNames(JSONObject jo) {
         int length = jo.length();
         if (length == 0) {
             return null;
@@ -637,7 +644,8 @@ public class JSONObject {
      *
      * @return An array of field names, or null if there are no names.
      */
-    public static String[] getNames(Object object) {
+    @SuppressWarnings("rawtypes")
+	public static String[] getNames(Object object) {
         if (object == null) {
             return null;
         }
@@ -730,7 +738,8 @@ public class JSONObject {
      *
      * @return An iterator of the keys.
      */
-    public Iterator keys() {
+    @SuppressWarnings("rawtypes")
+	public Iterator keys() {
         return this.keySet().iterator();
     }
 
@@ -739,7 +748,8 @@ public class JSONObject {
      *
      * @return A keySet.
      */
-    public Set keySet() {
+    @SuppressWarnings("rawtypes")
+	public Set keySet() {
         return this.map.keySet();
     }
 
@@ -759,7 +769,8 @@ public class JSONObject {
      * @return A JSONArray containing the key strings, or null if the JSONObject
      *         is empty.
      */
-    public JSONArray names() {
+    @SuppressWarnings("rawtypes")
+	public JSONArray names() {
         JSONArray ja = new JSONArray();
         Iterator keys = this.keys();
         while (keys.hasNext()) {
@@ -990,7 +1001,8 @@ public class JSONObject {
         return NULL.equals(object) ? defaultValue : object.toString();
     }
 
-    private void populateMap(Object bean) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	private void populateMap(Object bean) {
         Class klass = bean.getClass();
 
 // If klass is a System class then set includeSuperClass to false.
@@ -1063,7 +1075,8 @@ public class JSONObject {
      * @return this.
      * @throws JSONException
      */
-    public JSONObject put(String key, Collection value) throws JSONException {
+    @SuppressWarnings("rawtypes")
+	public JSONObject put(String key, Collection value) throws JSONException {
         this.put(key, new JSONArray(value));
         return this;
     }
@@ -1127,7 +1140,8 @@ public class JSONObject {
      * @return this.
      * @throws JSONException
      */
-    public JSONObject put(String key, Map value) throws JSONException {
+    @SuppressWarnings("rawtypes")
+	public JSONObject put(String key, Map value) throws JSONException {
         this.put(key, new JSONObject(value));
         return this;
     }
@@ -1146,7 +1160,8 @@ public class JSONObject {
      * @throws JSONException
      *             If the value is non-finite number or if the key is null.
      */
-    public JSONObject put(String key, Object value) throws JSONException {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public JSONObject put(String key, Object value) throws JSONException {
         String pooled;
         if (key == null) {
             throw new NullPointerException("Null key.");
@@ -1468,7 +1483,8 @@ public class JSONObject {
      * @throws JSONException
      *             If the value is or contains an invalid number.
      */
-    public static String valueToString(Object value) throws JSONException {
+    @SuppressWarnings("rawtypes")
+	public static String valueToString(Object value) throws JSONException {
         if (value == null || value.equals(null)) {
             return "null";
         }
@@ -1515,7 +1531,8 @@ public class JSONObject {
      *            The object to wrap
      * @return The wrapped value
      */
-    public static Object wrap(Object object) {
+    @SuppressWarnings("rawtypes")
+	public static Object wrap(Object object) {
         try {
             if (object == null) {
                 return NULL;
@@ -1566,7 +1583,8 @@ public class JSONObject {
         return this.write(writer, 0, 0);
     }
 
-    static final Writer writeValue(Writer writer, Object value,
+    @SuppressWarnings("rawtypes")
+	static final Writer writeValue(Writer writer, Object value,
             int indentFactor, int indent) throws JSONException, IOException {
         if (value == null || value.equals(null)) {
             writer.write("null");
@@ -1614,7 +1632,8 @@ public class JSONObject {
      * @return The writer.
      * @throws JSONException
      */
-    Writer write(Writer writer, int indentFactor, int indent)
+    @SuppressWarnings("rawtypes")
+	Writer write(Writer writer, int indentFactor, int indent)
             throws JSONException {
         try {
             boolean commanate = false;

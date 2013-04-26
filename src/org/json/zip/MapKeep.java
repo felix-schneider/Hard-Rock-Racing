@@ -37,6 +37,7 @@ import org.json.Kim;
  */
 class MapKeep extends Keep {
     private Object[] list;
+    @SuppressWarnings("rawtypes")
     private HashMap map;
 
     /**
@@ -45,6 +46,7 @@ class MapKeep extends Keep {
      *              The capacity of the keep expressed in the number of bits
      *              required to hold an integer.
      */
+    @SuppressWarnings("rawtypes")
     public MapKeep(int bits) {
         super(bits);
         this.list = new Object[this.capacity];
@@ -56,6 +58,7 @@ class MapKeep extends Keep {
      * The keep contents can be reduced by deleting all elements with low use
      * counts, and by reducing the use counts of the survivors.
      */
+    @SuppressWarnings("unchecked")
     private void compact() {
         int from = 0;
         int to = 0;
@@ -130,6 +133,7 @@ class MapKeep extends Keep {
      * time this value is encountered, its integer can be sent instead.
      * @param value A value.
      */
+    @SuppressWarnings("unchecked")
     public void register(Object value) {
         if (JSONzip.probe) {
             int integer = find(value);

@@ -25,7 +25,6 @@ public class ConnectionListener implements Runnable {
 				socket = server.accept();
 				socket.setSoTimeout(10000);
 			} catch (IOException e) {
-				e.printStackTrace();
 				return;
 			}
 			HardRockProtocol.log(this, "Incoming connection from "

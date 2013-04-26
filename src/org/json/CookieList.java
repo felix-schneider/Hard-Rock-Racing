@@ -68,7 +68,8 @@ public class CookieList {
      * @return A cookie list string
      * @throws JSONException
      */
-    public static String toString(JSONObject jo) throws JSONException {
+    @SuppressWarnings("rawtypes")
+	public static String toString(JSONObject jo) throws JSONException {
         boolean      b = false;
         Iterator     keys = jo.keys();
         String       string;

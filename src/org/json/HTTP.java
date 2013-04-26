@@ -124,7 +124,8 @@ public class HTTP {
      * @throws JSONException if the object does not contain enough
      *  information.
      */
-    public static String toString(JSONObject jo) throws JSONException {
+    @SuppressWarnings("rawtypes")
+	public static String toString(JSONObject jo) throws JSONException {
         Iterator     keys = jo.keys();
         String       string;
         StringBuffer sb = new StringBuffer();

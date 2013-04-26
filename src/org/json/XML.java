@@ -390,7 +390,8 @@ public class XML {
      * @return A string.
      * @throws JSONException
      */
-    public static String toString(Object object, String tagName)
+    @SuppressWarnings("rawtypes")
+	public static String toString(Object object, String tagName)
             throws JSONException {
         StringBuffer sb = new StringBuffer();
         int          i;
