@@ -4,188 +4,189 @@ import java.awt.geom.Point2D;
 
 public abstract class Vector2D {
 
-	protected Vector2D() {
+    protected Vector2D() {
 
-	}
+    }
 
-	public abstract double getX();
+    public abstract Vector2D add(Vector2D other);
 
-	public abstract double getY();
+    public double angleBetween(Vector2D other) {
+        return other.getDirection() - getDirection();
+    }
 
-	public abstract Vector2D add(Vector2D other);
+    public Point2D applyTo(Point2D what) {
+        return new Point2D.Double(what.getX() + getX(), what.getY() + getY());
+    }
 
-	public abstract Vector2D subtract(Vector2D other);
+    public abstract double dotProduct(Vector2D other);
 
-	public abstract Vector2D scale(double factor);
+    public abstract double getDirection();
 
-	public abstract Vector2D rotate(double theta);
+    public abstract double getMagnitude();
 
-	public Vector2D normalize() {
-		return scale(1 / getMagnitude());
-	}
+    public abstract double getSquareMagnitude();
 
-	public abstract double dotProduct(Vector2D other);
+    public abstract double getX();
 
-	public double angleBetween(Vector2D other) {
-		return other.getDirection() - getDirection();
-	}
+    public abstract double getY();
 
-	public abstract double getDirection();
+    public Vector2D normalize() {
+        return scale(1 / getMagnitude());
+    }
 
-	public abstract double getMagnitude();
+    public abstract Vector2D rotate(double theta);
 
-	public abstract double getSquareMagnitude();
+    public abstract Vector2D scale(double factor);
 
-	public String toString() {
-		return "(" + getX() + ", " + getY() + ")";
-	}
+    public abstract Vector2D subtract(Vector2D other);
 
-	public Point2D applyTo(Point2D what) {
-		return new Point2D.Double(what.getX() + getX(), what.getY() + getY());
-	}
+    @Override
+    public String toString() {
+        return "(" + getX() + ", " + getY() + ")";
+    }
 
-	public static class Polar extends Vector2D {
-		private double direction;
-		private double magnitude;
+    public static class Cartesian extends Vector2D {
+        private double x;
+        private double y;
 
-		public Polar(double direction, double magnitude) {
-			this.direction = direction;
-			this.magnitude = magnitude;
-		}
+        public Cartesian() {
+            this(1, 0);
+        }
 
-		public Polar() {
-			this(0, 1);
-		}
+        public Cartesian(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
 
-		public Polar(Vector2D other) {
-			this(other.getDirection(), other.getMagnitude());
-		}
+        public Cartesian(Point2D p) {
+            this(p.getX(), p.getY());
+        }
 
-		@Override
-		public double getX() {
-			return Math.cos(direction) * magnitude;
-		}
+        public Cartesian(Point2D p1, Point2D p2) {
+            this(p2.getX() - p1.getX(), p2.getY() - p1.getY());
+        }
 
-		@Override
-		public double getY() {
-			return Math.sin(direction) * magnitude;
-		}
+        public Cartesian(Vector2D other) {
+            this(other.getX(), other.getY());
+        }
 
-		@Override
-		public Vector2D add(Vector2D other) {
-			return new Cartesian(this).add(new Cartesian(other));
-		}
+        @Override
+        public Vector2D add(Vector2D other) {
+            return new Cartesian(x + other.getX(), y + other.getY());
+        }
 
-		@Override
-		public Vector2D subtract(Vector2D other) {
-			return add(other.scale(-1));
-		}
+        @Override
+        public double dotProduct(Vector2D other) {
+            return x * other.getX() + y * other.getY();
+        }
 
-		@Override
-		public Vector2D scale(double factor) {
-			return new Polar(direction, magnitude * factor);
-		}
+        @Override
+        public double getDirection() {
+            return Math.atan2(y, x);
+        }
 
-		@Override
-		public Vector2D rotate(double theta) {
-			return new Polar(direction + theta, magnitude);
-		}
+        @Override
+        public double getMagnitude() {
+            return Math.sqrt(x * x + y * y);
+        }
 
-		@Override
-		public double dotProduct(Vector2D other) {
-			return getMagnitude() * other.getMagnitude()
-					* Math.cos(angleBetween(other));
-		}
+        @Override
+        public double getSquareMagnitude() {
+            return x * x + y * y;
+        }
 
-		@Override
-		public double getDirection() {
-			return direction;
-		}
+        @Override
+        public double getX() {
+            return x;
+        }
 
-		@Override
-		public double getMagnitude() {
-			return magnitude;
-		}
+        @Override
+        public double getY() {
+            return y;
+        }
 
-		@Override
-		public double getSquareMagnitude() {
-			return magnitude * magnitude;
-		}
-	}
+        @Override
+        public Vector2D rotate(double theta) {
+            return new Polar(this).rotate(theta);
+        }
 
-	public static class Cartesian extends Vector2D {
-		private double x;
-		private double y;
+        @Override
+        public Vector2D scale(double factor) {
+            return new Cartesian(x * factor, y * factor);
+        }
 
-		public Cartesian(double x, double y) {
-			this.x = x;
-			this.y = y;
-		}
+        @Override
+        public Vector2D subtract(Vector2D other) {
+            return new Cartesian(x - other.getX(), y - other.getY());
+        }
+    }
 
-		public Cartesian() {
-			this(1, 0);
-		}
+    public static class Polar extends Vector2D {
+        private double direction;
+        private double magnitude;
 
-		public Cartesian(Vector2D other) {
-			this(other.getX(), other.getY());
-		}
+        public Polar() {
+            this(0, 1);
+        }
 
-		public Cartesian(Point2D p) {
-			this(p.getX(), p.getY());
-		}
+        public Polar(double direction, double magnitude) {
+            this.direction = direction;
+            this.magnitude = magnitude;
+        }
 
-		public Cartesian(Point2D p1, Point2D p2) {
-			this(p2.getX() - p1.getX(), p2.getY() - p1.getY());
-		}
+        public Polar(Vector2D other) {
+            this(other.getDirection(), other.getMagnitude());
+        }
 
-		@Override
-		public double getX() {
-			return x;
-		}
+        @Override
+        public Vector2D add(Vector2D other) {
+            return new Cartesian(this).add(new Cartesian(other));
+        }
 
-		@Override
-		public double getY() {
-			return y;
-		}
+        @Override
+        public double dotProduct(Vector2D other) {
+            return getMagnitude() * other.getMagnitude()
+                    * Math.cos(angleBetween(other));
+        }
 
-		@Override
-		public Vector2D add(Vector2D other) {
-			return new Cartesian(x + other.getX(), y + other.getY());
-		}
+        @Override
+        public double getDirection() {
+            return direction;
+        }
 
-		@Override
-		public Vector2D subtract(Vector2D other) {
-			return new Cartesian(x - other.getX(), y - other.getY());
-		}
+        @Override
+        public double getMagnitude() {
+            return magnitude;
+        }
 
-		@Override
-		public Vector2D scale(double factor) {
-			return new Cartesian(x * factor, y * factor);
-		}
+        @Override
+        public double getSquareMagnitude() {
+            return magnitude * magnitude;
+        }
 
-		@Override
-		public Vector2D rotate(double theta) {
-			return new Polar(this).rotate(theta);
-		}
+        @Override
+        public double getX() {
+            return Math.cos(direction) * magnitude;
+        }
 
-		@Override
-		public double dotProduct(Vector2D other) {
-			return x * other.getX() + y * other.getY();
-		}
+        @Override
+        public double getY() {
+            return Math.sin(direction) * magnitude;
+        }
 
-		@Override
-		public double getDirection() {
-			return Math.atan2(y, x);
-		}
+        @Override
+        public Vector2D rotate(double theta) {
+            return new Polar(direction + theta, magnitude);
+        }
 
-		@Override
-		public double getMagnitude() {
-			return Math.sqrt(x * x + y * y);
-		}
+        @Override
+        public Vector2D scale(double factor) {
+            return new Polar(direction, magnitude * factor);
+        }
 
-		@Override
-		public double getSquareMagnitude() {
-			return x * x + y * y;
-		}
-	}
+        @Override
+        public Vector2D subtract(Vector2D other) {
+            return add(other.scale(-1));
+        }
+    }
 }
