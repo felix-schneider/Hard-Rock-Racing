@@ -63,30 +63,6 @@ public class Car extends GameObject implements Collides {
     private static final double     epsilon            = 10e-5;
     private static int              idtotal            = 1;
     
-    public static void collide(Car one, Car other) {
-        if (one.cooldown > 0 && other.cooldown > 0) {
-            return;
-        }
-        one.cooldown = collisionCooldown;
-        other.cooldown = collisionCooldown;
-        double speedDiff = one.getSpeed().subtract(other.getSpeed())
-                .getMagnitude();
-        Vector2D ab = new Vector2D.Polar(new Vector2D.Cartesian(
-                one.getLocation(), other.getLocation()).getDirection(),
-                speedDiff);
-        one.setSpeed(one.getSpeed().subtract(ab));
-        other.setSpeed(other.getSpeed().add(ab));
-        if (speedDiff > damageThreshHold) {
-            Car slower;
-            if (one.getSpeed().getMagnitude() < other.getSpeed().getMagnitude()) {
-                slower = one;
-            } else {
-                slower = other;
-            }
-            slower.damage((int) (speedDiff / damageThreshHold));
-        }
-    }
-    
     private int    accelerating; // 0 not accelerating, 1 forward, 2 backward
     private double boost;       // boost duration
                                  // positive y, < 0 the other way
@@ -306,6 +282,38 @@ public class Car extends GameObject implements Collides {
         
         if (boost > 0) {
             boost -= delta;
+        }
+    }
+    
+    
+    public static void collide(Car one, Car other) {
+        if (one.cooldown > 0 && other.cooldown > 0) {
+            return;
+        }
+        one.cooldown = collisionCooldown;
+        other.cooldown = collisionCooldown;
+        double onespeed = one.getSpeed().getMagnitude();
+        double otherspeed = other.getSpeed().getMagnitude();
+        double fasterspeed = Math.max(onespeed, otherspeed);
+        double slowerspeed = Math.min(onespeed, otherspeed);
+        // if the cars are headed towards each other - add the speeds
+        // if they are going the same way - subtract
+        // if they are going perpendicular to eacth other, take the faster one
+        double speedDiff = fasterspeed
+                - Math.cos(one.getSpeed().angleBetween(other.getSpeed())) * slowerspeed;
+        Vector2D ab = new Vector2D.Polar(new Vector2D.Cartesian(
+                one.getLocation(), other.getLocation()).getDirection(),
+                speedDiff);
+        one.setSpeed(one.getSpeed().subtract(ab));
+        other.setSpeed(other.getSpeed().add(ab));
+        if (speedDiff > damageThreshHold) {
+            Car slower;
+            if (one.getSpeed().getMagnitude() < other.getSpeed().getMagnitude()) {
+                slower = one;
+            } else {
+                slower = other;
+            }
+            slower.damage((int) (speedDiff / damageThreshHold));
         }
     }
 }
