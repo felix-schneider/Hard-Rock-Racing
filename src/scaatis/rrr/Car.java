@@ -51,8 +51,7 @@ public class Car extends GameObject implements Collides {
     /**
      * The hitbox of the car when facing positive x
      */
-    public static final Rectangle2D hitbox             = new Rectangle2D.Double(0, 0, 60,
-                                                               45);
+    public static final Rectangle2D hitbox             = new Rectangle2D.Double(0, 0, 60, 45);
     
     public static final int         maxHP              = 6;
     /**
@@ -61,7 +60,6 @@ public class Car extends GameObject implements Collides {
     public static final double      minSpeed           = 50;
     
     private static final double     epsilon            = 10e-5;
-    private static int              idtotal            = 1;
     
     private int    accelerating; // 0 not accelerating, 1 forward, 2 backward
     private double boost;       // boost duration
@@ -69,7 +67,6 @@ public class Car extends GameObject implements Collides {
     private double cooldown;    // cooldown for car/car collision
     private double facing;
     private int    hp;
-    private int    id;
     private double mine;        // mine stun duration
                                  
     private int    turning;     // 0 - not turning, > 0 turning from positive x
@@ -90,7 +87,6 @@ public class Car extends GameObject implements Collides {
         turning = 0;
         cooldown = 0;
         hp = maxHP;
-        id = idtotal++;
         boost = 0;
         mine = 0;
     }
@@ -178,10 +174,6 @@ public class Car extends GameObject implements Collides {
     
     public int getHP() {
         return hp;
-    }
-    
-    public int getID() {
-        return id;
     }
     
     public Point getIntLocation() {

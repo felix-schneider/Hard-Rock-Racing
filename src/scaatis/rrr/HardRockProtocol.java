@@ -175,7 +175,6 @@ public class HardRockProtocol {
             Car car = player.getCar();
             JSONObject obj = car.toJSON();
             obj.put("message", "car");
-            obj.put("id", car.getID());
             obj.put("driver", player.getName());
             obj.put("hp", car.getHP());
             obj.put("facing", car.getFacing());

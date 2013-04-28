@@ -130,7 +130,6 @@ public class HardRockRacing {
             try {
                 Thread.sleep((int) (1000 / ((double) fps) - (timeB - timeA) / 1e6));
             } catch (InterruptedException e) {
-                e.printStackTrace();
             } catch (IllegalArgumentException e) {
                 HardRockProtocol.log(this, "Cannot keep up!");
             }
@@ -321,6 +320,7 @@ public class HardRockRacing {
             player.setCar(null);
             finished.add(player);
         }
+        currentTrack = null;
         clearRacers();
         missiles.clear();
         mines.clear();
