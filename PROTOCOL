@@ -128,12 +128,8 @@ PLAYER
 {"message":"player",
  "name":NAME,
  "character":CHARACTER,
- "cartype":CARTYPE,
- "carID":ID
+ "cartype":CARTYPE
 }
-carID is the ID of the CAR object this AI is currently controlling, or 0 if it is
-not currently driving one (it is not racing, the race has not started, or it
-has not yet respawned)
 
 CAR
 ---
