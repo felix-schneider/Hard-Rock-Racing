@@ -92,6 +92,9 @@ public class HardRockProtocol {
         // check name
         if (!player.isObserver()) {
             for (Player player2 : players.values()) {
+                if(player2.isObserver()) {
+                    continue;
+                }
                 if (player2.getName().equals(player.getName())) {
                     connection.send("Could not connect, name already in use.");
                     connection.close();
@@ -145,7 +148,8 @@ public class HardRockProtocol {
             players.add(player.toJSON());
         }
         message.put("players", players);
-        JSONObject messageTiled = new JSONObject(message);
+        message.put("laps", HardRockRacing.laps);
+        JSONObject messageTiled = new JSONObject(message, new String[] { "message", "players", "laps" });
         message.put("track", game.getCurrentTrack().toJSON(false));
         messageTiled.put("track", game.getCurrentTrack().toJSON(true));
         String notTiled = message.toString();
@@ -173,16 +177,14 @@ public class HardRockProtocol {
         ArrayList<JSONObject> cars = new ArrayList<>();
         for (Player player : game.getRacers()) {
             Car car = player.getCar();
+            if(car == null) {
+                continue;
+            }
             JSONObject obj = car.toJSON();
-            obj.put("message", "car");
             obj.put("driver", player.getName());
-            obj.put("hp", car.getHP());
-            obj.put("facing", car.getFacing());
             obj.put("missiles", player.getMissiles());
             obj.put("boosts", player.getBoosts());
             obj.put("lapscomplete", player.getCompletedLaps());
-            obj.put("accelerating", car.getAccelerating() == 1);
-            obj.put("turning", car.getTurning());
             cars.add(obj);
         }
         gamestate.put("cars", cars);
@@ -210,9 +212,10 @@ public class HardRockProtocol {
         sendToAll(message.toString());
     }
     
-    public void sendMineHit(Mine missile, Player victim) {
+    public void sendMineHit(Mine mine, Player victim) {
         JSONObject message = new JSONObject();
         message.put("message", "mine");
+        message.put("mine", mine.getID());
         message.put("target", victim.getName());
         sendToAll(message.toString());
     }
@@ -220,17 +223,12 @@ public class HardRockProtocol {
     public void sendMissileHit(Missile missile, Player victim) {
         JSONObject message = new JSONObject();
         message.put("message", "missilehit");
+        message.put("missile", missile.getID());
         message.put("target", victim.getName());
         message.put("shooter", missile.getShooter().getName());
         sendToAll(message.toString());
     }
-    
-    public void sendRaceAborted() {
-        JSONObject message = new JSONObject();
-        message.put("message", "raceaborted");
-        sendToAll(message.toString());
-    }
-    
+
     public void sendRaceOver(List<Player> placement) {
         JSONObject message = new JSONObject();
         message.put("message", "raceover");
@@ -343,7 +341,6 @@ public class HardRockProtocol {
             } catch (JSONException e) {
                 
             }
-            System.out.println(tiledMap);
             Player player = new Player(name, charac, carType, tiledMap);
             HardRockProtocol.log(this, "Handshake successful for new Player: " + player.toString());
             err.println(successfulHandshake.toString());
@@ -390,12 +387,19 @@ public class HardRockProtocol {
     protected void startRace() {
         // Pick racers
         ArrayList<Player> racers = new ArrayList<>();
-        for (int i = 0; i < Math.min(4, getNumberOfPlayers()); i++) {
-            racers.add(Util.getRandom(players.values(), racers));
+        ArrayList<Player> racerPool = new ArrayList<>();
+        for(Player player : players.values()) {
+            if(!player.isObserver()) {
+                racerPool.add(player);
+            }
+        }
+        
+        for (int i = 0; i < Math.min(4, racerPool.size()); i++) {
+            racers.add(Util.getRandom(racerPool, racers));
         }
         
         // Assign Characters
-        List<RaceCharacter> characters = Arrays.asList(RaceCharacter.values());
+        List<RaceCharacter> characters = new ArrayList<>(Arrays.asList(RaceCharacter.values()));
         for (Player player : racers) {
             if (characters.contains(player.getPreferredCharacter())) {
                 player.setCharacter(player.getPreferredCharacter());
@@ -464,7 +468,7 @@ public class HardRockProtocol {
             player.stopAccelerating();
         } else if (type.equals("stopturning")) {
             player.stopTurning();
-        } else if (type.equals("firemissile")) {
+        } else if (type.equals("missile")) {
             player.fireMissile();
         } else if (type.equals("boost")) {
             player.boost();

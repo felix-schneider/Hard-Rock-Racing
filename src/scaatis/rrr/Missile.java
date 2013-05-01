@@ -59,7 +59,7 @@ public class Missile extends GameObject implements Collides {
 	@Override
 	public JSONObject toJSON() {
 		JSONObject obj = super.toJSON();
-		obj.put("message", "misile");
+		obj.put("message", "missile");
 		obj.put("shooter", shooter.getName());
 		return obj;
 	}

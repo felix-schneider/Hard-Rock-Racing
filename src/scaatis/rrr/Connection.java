@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -18,6 +19,7 @@ public class Connection implements Closeable, Runnable {
 	private BufferedReader in;
 	private HardRockProtocol protocol;
 	private ConcurrentLinkedQueue<String> inputQueue;
+	private ConcurrentLinkedQueue<String> outputQueue;
 	private boolean running;
 
 	public Connection(Socket socket, HardRockProtocol protocol)
@@ -28,6 +30,7 @@ public class Connection implements Closeable, Runnable {
 		this.protocol = protocol;
 		running = false;
 		inputQueue = new ConcurrentLinkedQueue<>();
+		outputQueue = new ConcurrentLinkedQueue<>();
 	}
 
 	@Override
@@ -67,8 +70,15 @@ public class Connection implements Closeable, Runnable {
 		} else {
 			protocol.connectPlayer(this, player);
 		}
-
+		try {
+            socket.setSoTimeout(10);
+        } catch (SocketException e1) {
+            close();
+        }
 		while (running) {
+		    while(!outputQueue.isEmpty()) {
+		        out.println(outputQueue.poll());
+		    }
 			try {
 				line = in.readLine();
 			} catch (SocketTimeoutException e) {
@@ -114,7 +124,7 @@ public class Connection implements Closeable, Runnable {
 		if (!(other instanceof Connection)) {
 			return false;
 		}
-		return socket.equals(((Connection) other).socket);
+		return socket == ((Connection) other).socket;
 	}
 
 	@Override
@@ -135,7 +145,10 @@ public class Connection implements Closeable, Runnable {
 	}
 	
 	public void send(String message) {
-		out.println(message);
+	    if(outputQueue.size() > 5) {
+	        outputQueue.poll();
+	    }
+	    outputQueue.add(message);
 	}
 	
 	public void send(JSONObject message) {

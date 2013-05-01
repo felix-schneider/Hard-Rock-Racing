@@ -186,6 +186,7 @@ MISSILEHIT
 When a player is hit by another player's missile, all players are sent a
 missilehit package:
 {"message":"missilehit",
+ "missile":id
  "target":playername,
  "shooter":playername
 }
@@ -194,6 +195,7 @@ MINEHIT
 -------
 When a player drives into a mine, all players get a message
 {"message":"minehit",
+ "mine":id
  "target":playername
 }
 
@@ -214,11 +216,6 @@ all players:
  "placement":[WINNER, SECOND, THIRD, LOSER]
 }
 WINNER etc. are the names of players
-
-RACEABORTED
------------
-The race was aborted, usually because too many players disconnected.
-{"message":"raceaborted"}
 
 OBSERVER
 --------
@@ -243,7 +240,7 @@ turnright
 accelerate
 stopaccelerate
 stopturning
-firemissile
+missile
 boost
 mine
 This package is resent to all players (including the one who sent it) with a 

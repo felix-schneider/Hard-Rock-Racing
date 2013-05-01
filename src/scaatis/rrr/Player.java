@@ -83,14 +83,13 @@ public class Player implements JSONable {
                     || e.getCheckPoint() == getLastCheckPoint()) {
                 return;
             }
-            CheckPointListener[] ls = listeners
-                    .getListeners(CheckPointListener.class);
-            CheckPointEvent event = new CheckPointEvent(this, e.getCheckPoint());
-            for (CheckPointListener listener : ls) {
-                listener.checkPoint(event);
-            }
         } else {
             checkPoints.add(0, e.getCheckPoint());
+        }
+        CheckPointListener[] ls = listeners.getListeners(CheckPointListener.class);
+        CheckPointEvent event = new CheckPointEvent(this, e.getCheckPoint());
+        for (CheckPointListener listener : ls) {
+            listener.checkPoint(event);
         }
     }
     
@@ -100,8 +99,7 @@ public class Player implements JSONable {
         missiles = maxMissiles;
         boosts = maxBoosts;
         mines = maxMines;
-        LapCompletedListener[] ls = listeners
-                .getListeners(LapCompletedListener.class);
+        LapCompletedListener[] ls = listeners.getListeners(LapCompletedListener.class);
         LapCompletedEvent event = new LapCompletedEvent(this);
         for (LapCompletedListener listener : ls) {
             listener.lapCompleted(event);
@@ -147,8 +145,7 @@ public class Player implements JSONable {
             missiles--;
             Missile missile = new Missile(this);
             // activate listeners
-            MissileFireListener[] ls = listeners
-                    .getListeners(MissileFireListener.class);
+            MissileFireListener[] ls = listeners.getListeners(MissileFireListener.class);
             MissileFireEvent event = new MissileFireEvent(this, missile);
             for (MissileFireListener listener : ls) {
                 listener.missileFired(event);
@@ -170,8 +167,7 @@ public class Player implements JSONable {
                     Car.hitbox.getWidth());
             Mine mine = new Mine(offset.applyTo(car.getLocation()));
             // activate Listeners
-            MineDropListener[] ls = listeners
-                    .getListeners(MineDropListener.class);
+            MineDropListener[] ls = listeners.getListeners(MineDropListener.class);
             MineDropEvent event = new MineDropEvent(this, mine);
             for (MineDropListener listener : ls) {
                 listener.mineDropped(event);
@@ -192,6 +188,9 @@ public class Player implements JSONable {
             return;
         }
         this.car = car;
+        if(car == null) {
+        	return;
+        }
         car.addCheckPointListener(new CheckPointListener() {
             @Override
             public void checkPoint(CheckPointEvent e) {
@@ -209,6 +208,14 @@ public class Player implements JSONable {
     
     public int getCompletedLaps() {
         return completedLaps;
+    }
+    
+    public void clear() {
+    	completedLaps = 0;
+    	checkPoints.clear();
+    	listeners = new EventListenerList();
+    	setCar(null);
+    	character = null;
     }
     
     public int getMissiles() {
@@ -281,10 +288,6 @@ public class Player implements JSONable {
     
     public void removeMineDropListener(MineDropListener listener) {
         listeners.remove(MineDropListener.class, listener);
-    }
-    
-    public void clearListeners() {
-        listeners = new EventListenerList();
     }
     
     @Override

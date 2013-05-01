@@ -7,6 +7,8 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
+import org.json.JSONObject;
+
 import scaatis.rrr.event.CheckPointEvent;
 import scaatis.rrr.event.CheckPointListener;
 import scaatis.rrr.tracktiles.CheckPoint;
@@ -43,9 +45,6 @@ public class Car extends GameObject implements Collides {
     public static final double      collisionRepulsion = 40;
     public static final double      collisionRotation  = Math.toRadians(15);
     
-    /**
-     * Minimum speed difference so that a player will take damage in a collision
-     */
     public static final double      damageThreshHold   = 90;
     
     /**
@@ -277,6 +276,16 @@ public class Car extends GameObject implements Collides {
         }
     }
     
+    @Override
+    public JSONObject toJSON() {
+        JSONObject result = super.toJSON();
+        result.put("message", "car");
+        result.put("hp", getHP());
+        result.put("facing", getFacing());
+        result.put("accelerating", getAccelerating() == 1);
+        result.put("turning", getTurning());
+        return result;
+    }
     
     public static void collide(Car one, Car other) {
         if (one.cooldown > 0 && other.cooldown > 0) {
@@ -298,14 +307,5 @@ public class Car extends GameObject implements Collides {
                 speedDiff);
         one.setSpeed(one.getSpeed().subtract(ab));
         other.setSpeed(other.getSpeed().add(ab));
-        if (speedDiff > damageThreshHold) {
-            Car slower;
-            if (one.getSpeed().getMagnitude() < other.getSpeed().getMagnitude()) {
-                slower = one;
-            } else {
-                slower = other;
-            }
-            slower.damage((int) (speedDiff / damageThreshHold));
-        }
     }
 }

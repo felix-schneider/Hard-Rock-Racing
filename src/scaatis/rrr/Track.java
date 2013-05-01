@@ -10,9 +10,8 @@ import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -135,7 +134,7 @@ public class Track implements Collides, JSONable {
             obj.put("width", image.getWidth());
             obj.put("height", image.getHeight());
             obj.put("startdir", startDir.toString());
-            obj.put("values", Arrays.asList(((DataBufferByte) image.getRaster().getDataBuffer()).getData()));
+            obj.put("data", ((DataBufferInt) image.getRaster().getDataBuffer()).getData());
         }
         return obj;
     }
@@ -162,19 +161,13 @@ public class Track implements Collides, JSONable {
         Graphics2D g = image.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_OFF);
-        g.setColor(Color.white);
+        g.setColor(new Color(0xffffff));
         for (TrackTile t : tiles) {
             track.add(t.getArea());
             g.fill(t.getArea());
         }
-        g.setColor(Color.green);
+        g.setColor(new Color(0x00ff00));
         g.fill(finishLine.getArea());
-        g.setColor(Color.yellow);
-        for (CheckPoint checkPoint : checkPoints) {
-            if (checkPoint != finishLine) {
-                g.fill(checkPoint.getArea());
-            }
-        }
         g.dispose();
     }
     

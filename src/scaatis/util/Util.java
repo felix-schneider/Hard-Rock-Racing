@@ -10,7 +10,7 @@ public class Util {
 		if (list.size() == 0) {
 			return null;
 		}
-		return list.get(new Random().nextInt() % list.size());
+		return list.get(new Random().nextInt(list.size()));
 	}
 
 	public static <T> T getRandom(List<T> list, Collection<T> except) {

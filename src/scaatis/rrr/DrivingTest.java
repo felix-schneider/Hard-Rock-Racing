@@ -128,10 +128,10 @@ public class DrivingTest extends JPanel implements KeyListener {
 		// .getTranslateInstance(diagonal / 2 - 50, 0));
 		// g2d.transform(AffineTransform.getScaleInstance(1, .25));
 		// g2d.transform(AffineTransform.getRotateInstance(.25 * Math.PI));
-
+		g2d.scale(.5, .5);
 		g2d.setColor(Color.white);
 		g2d.fill(track.getTrackArea());
-		g2d.setColor(Color.darkGray);
+		g2d.setColor(Color.gray);
 		g2d.fill(car.getArea());
 	}
 
