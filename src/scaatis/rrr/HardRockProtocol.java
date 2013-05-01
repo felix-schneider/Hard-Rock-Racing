@@ -19,7 +19,7 @@ import scaatis.rrr.tracktiles.TrackTile;
 import scaatis.util.Util;
 
 public class HardRockProtocol {
-    
+
     public static final int                      port = 1993;
     private static final HashMap<String, Number> constants;
     private static final JSONObject              successfulHandshake;
@@ -62,18 +62,18 @@ public class HardRockProtocol {
         constants.put("track.curve.innerradius", TrackTile.SEGMENT_LENGTH);
         constants.put("track.curve.outerradius", TrackTile.SEGMENT_LENGTH + TrackTile.TRACK_WIDTH);
     }
-    
+
     public static void log(Object source, String message) {
         System.out.println("[" + source.getClass().getSimpleName() + "] " + message);
     }
-    
+
     private ConcurrentLinkedQueue<Connection>     disconnected;
     private HardRockRacing                        game;
     private boolean                               hasPlayers;
     private ConnectionListener                    listener;
     private ConcurrentHashMap<Connection, Player> players;
     private ServerSocket                          server;
-    
+
     public HardRockProtocol(HardRockRacing game) {
         this.game = game;
         players = new ConcurrentHashMap<>();
@@ -87,12 +87,12 @@ public class HardRockProtocol {
         listener = new ConnectionListener(server, this);
         hasPlayers = false;
     }
-    
+
     public void connectPlayer(Connection connection, Player player) {
         // check name
         if (!player.isObserver()) {
             for (Player player2 : players.values()) {
-                if(player2.isObserver()) {
+                if (player2.isObserver()) {
                     continue;
                 }
                 if (player2.getName().equals(player.getName())) {
@@ -110,19 +110,19 @@ public class HardRockProtocol {
         hasPlayers = getNumberOfPlayers() > 0;
         game.updateGUI();
     }
-    
+
     public Set<Map.Entry<Connection, Player>> getConnectionEntries() {
         return players.entrySet();
     }
-    
+
     public int getNumberOfConnections() {
         return players.size();
     }
-    
+
     public int getNumberOfObservers() {
         return getNumberOfConnections() - getNumberOfPlayers();
     }
-    
+
     public int getNumberOfPlayers() {
         int i = 0;
         for (Player player : players.values()) {
@@ -132,14 +132,14 @@ public class HardRockProtocol {
         }
         return i;
     }
-    
+
     public void sendDestroyed(Car car) {
         JSONObject message = new JSONObject();
         message.put("message", "destroyed");
         message.put("car", car.getID());
         sendToAll(message.toString());
     }
-    
+
     public void sendGameStart() {
         JSONObject message = new JSONObject();
         message.put("message", "gamestart");
@@ -169,7 +169,7 @@ public class HardRockProtocol {
             }
         }
     }
-    
+
     public void sendGameState() {
         JSONObject gamestate = new JSONObject();
         gamestate.put("message", "gamestate");
@@ -177,7 +177,7 @@ public class HardRockProtocol {
         ArrayList<JSONObject> cars = new ArrayList<>();
         for (Player player : game.getRacers()) {
             Car car = player.getCar();
-            if(car == null) {
+            if (car == null) {
                 continue;
             }
             JSONObject obj = car.toJSON();
@@ -188,22 +188,22 @@ public class HardRockProtocol {
             cars.add(obj);
         }
         gamestate.put("cars", cars);
-        
+
         ArrayList<JSONObject> missiles = new ArrayList<>();
         for (Missile missile : game.getMissiles()) {
             missiles.add(missile.toJSON());
         }
         gamestate.put("missiles", missiles);
-        
+
         ArrayList<JSONObject> mines = new ArrayList<>();
         for (Mine mine : game.getMines()) {
             mines.add(mine.toJSON());
         }
         gamestate.put("mines", mines);
-        
+
         sendToAll(gamestate.toString());
     }
-    
+
     public void sendLapComplete(Player player) {
         JSONObject message = new JSONObject();
         message.put("message", "lapcomplete");
@@ -211,7 +211,7 @@ public class HardRockProtocol {
         message.put("lapsleft", HardRockRacing.laps - player.getCompletedLaps());
         sendToAll(message.toString());
     }
-    
+
     public void sendMineHit(Mine mine, Player victim) {
         JSONObject message = new JSONObject();
         message.put("message", "mine");
@@ -219,7 +219,7 @@ public class HardRockProtocol {
         message.put("target", victim.getName());
         sendToAll(message.toString());
     }
-    
+
     public void sendMissileHit(Missile missile, Player victim) {
         JSONObject message = new JSONObject();
         message.put("message", "missilehit");
@@ -235,7 +235,7 @@ public class HardRockProtocol {
         message.put("placement", placement);
         sendToAll(message.toString());
     }
-    
+
     public void sendToAll(String message) {
         for (Connection connection : players.keySet()) {
             Player p = players.get(connection);
@@ -249,11 +249,11 @@ public class HardRockProtocol {
             }
         }
     }
-    
+
     public void start() {
         new Thread(listener).start();
     }
-    
+
     public void stop() {
         listener.stop();
         for (Connection connection : players.keySet()) {
@@ -261,15 +261,16 @@ public class HardRockProtocol {
         }
         try {
             server.close();
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
         log(this, "Server was stopped.");
     }
-    
+
     public void update() {
         while (!disconnected.isEmpty()) {
             disconnect(disconnected.poll());
         }
-        
+
         for (Connection connection : players.keySet()) {
             while (connection.hasInput()) {
                 parseInput(connection, connection.nextInput());
@@ -279,7 +280,7 @@ public class HardRockProtocol {
             startRace();
         }
     }
-    
+
     protected Player attemptHandShake(String line, PrintWriter err) {
         JSONObject object;
         try {
@@ -288,7 +289,7 @@ public class HardRockProtocol {
             err.println(e.getMessage());
             return null;
         }
-        
+
         String message = getString(object, "message");
         if (message == null) {
             err.println("no message field");
@@ -313,7 +314,7 @@ public class HardRockProtocol {
                 err.println("No name field");
                 return null;
             }
-            
+
             String character = getString(object, "character");
             if (character == null) {
                 return null;
@@ -323,7 +324,7 @@ public class HardRockProtocol {
                 err.println("Unknown character: " + character);
                 return null;
             }
-            
+
             String ctype = getString(object, "cartype");
             if (ctype == null) {
                 err.println("No cartype field");
@@ -334,12 +335,12 @@ public class HardRockProtocol {
                 err.println("Unknown car type: " + ctype);
                 return null;
             }
-            
+
             boolean tiledMap = false;
             try {
                 tiledMap = object.getBoolean("tracktiled");
             } catch (JSONException e) {
-                
+
             }
             Player player = new Player(name, charac, carType, tiledMap);
             HardRockProtocol.log(this, "Handshake successful for new Player: " + player.toString());
@@ -350,11 +351,11 @@ public class HardRockProtocol {
             return null;
         }
     }
-    
+
     protected void connectionLost(Connection connection) {
         disconnected.add(connection);
     }
-    
+
     protected void parseInput(Connection connection, String message) {
         JSONObject object;
         try {
@@ -383,21 +384,21 @@ public class HardRockProtocol {
             connection.send("Unknown message: " + message);
         }
     }
-    
+
     protected void startRace() {
         // Pick racers
         ArrayList<Player> racers = new ArrayList<>();
         ArrayList<Player> racerPool = new ArrayList<>();
-        for(Player player : players.values()) {
-            if(!player.isObserver()) {
+        for (Player player : players.values()) {
+            if (!player.isObserver()) {
                 racerPool.add(player);
             }
         }
-        
+
         for (int i = 0; i < Math.min(4, racerPool.size()); i++) {
             racers.add(Util.getRandom(racerPool, racers));
         }
-        
+
         // Assign Characters
         List<RaceCharacter> characters = new ArrayList<>(Arrays.asList(RaceCharacter.values()));
         for (Player player : racers) {
@@ -412,7 +413,7 @@ public class HardRockProtocol {
         }
         game.startPreRace(racers);
     }
-    
+
     protected void transmitTrack(Connection connection) {
         Player pl = players.get(connection);
         if (pl == null) {
@@ -422,7 +423,7 @@ public class HardRockProtocol {
             connection.send(game.getCurrentTrack().toJSON(pl.transferMapTiled()));
         }
     }
-    
+
     private void disconnect(Connection connection) {
         Player player = players.get(connection);
         if (player != null) {
@@ -433,15 +434,16 @@ public class HardRockProtocol {
         hasPlayers = getNumberOfPlayers() > 0;
         game.updateGUI();
     }
-    
+
     private String getString(JSONObject obj, String key) {
         String val = null;
         try {
             val = obj.getString(key);
-        } catch (JSONException e) {}
+        } catch (JSONException e) {
+        }
         return val;
     }
-    
+
     private void parseAction(Connection connection, JSONObject action) {
         Player player = players.get(connection);
         if (player == null || !game.getRacers().contains(player)) {
@@ -481,7 +483,7 @@ public class HardRockProtocol {
         action.put("player", player.getName());
         sendToAll(action.toString());
     }
-    
+
     private void parseRequest(Connection connection, JSONObject request) {
         String key;
         try {

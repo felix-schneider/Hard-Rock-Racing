@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
 import scaatis.rrr.event.CheckPointEvent;
 import scaatis.rrr.event.CheckPointListener;
 import scaatis.rrr.event.DestroyedEvent;
@@ -50,7 +49,7 @@ public class HardRockRacing {
     private RaceState                           state;
 
     private Collection<GameObject>              toBeDestroyed;
-    private ConcurrentLinkedQueue<GameObject> newProjectiles;
+    private ConcurrentLinkedQueue<GameObject>   newProjectiles;
 
     public HardRockRacing(List<String> maps) {
         running = false;
@@ -264,7 +263,7 @@ public class HardRockRacing {
 
     private void clearFinished() {
         for (Player player : finished) {
-        	player.clear();
+            player.clear();
         }
         finished.clear();
     }
@@ -294,21 +293,21 @@ public class HardRockRacing {
             }
         }
         for (Player player : racers) {
-        	if(player.getCar() == null) {
-        		continue;
-        	}
+            if (player.getCar() == null) {
+                continue;
+            }
             if (collide(player.getCar(), currentTrack)) {
                 player.getCar().collideWith(currentTrack);
             }
-            for(CheckPoint checkpoint : currentTrack.getCheckpoints()) {
-            	if(collide(player.getCar(), checkpoint)) {
-            		player.getCar().collideWith(checkpoint);
-            	}
+            for (CheckPoint checkpoint : currentTrack.getCheckpoints()) {
+                if (collide(player.getCar(), checkpoint)) {
+                    player.getCar().collideWith(checkpoint);
+                }
             }
             for (Player player2 : racers) {
-            	if(player2.getCar() != null && collide(player.getCar(), player2.getCar())) {
-            		Car.collide(player.getCar(), player2.getCar());
-            	}
+                if (player2.getCar() != null && collide(player.getCar(), player2.getCar())) {
+                    Car.collide(player.getCar(), player2.getCar());
+                }
             }
         }
     }
@@ -329,8 +328,8 @@ public class HardRockRacing {
         for (Player player : racers) {
             finished.add(player);
         }
-        for(Player player : finished) {
-        	player.setCar(null);
+        for (Player player : finished) {
+            player.setCar(null);
         }
         currentTrack = null;
         racers.clear();
@@ -391,8 +390,8 @@ public class HardRockRacing {
         }
         Player player = (Player) e.getSource();
         protocol.sendLapComplete(player);
-        HardRockProtocol.log(this, "Player " + player.getName() + 
-        		" has completed lap " + player.getCompletedLaps());
+        HardRockProtocol.log(this, "Player " + player.getName() +
+                " has completed lap " + player.getCompletedLaps());
     }
 
     private void mineDrop(MineDropEvent event) {
@@ -460,32 +459,32 @@ public class HardRockRacing {
                 player.getCar().update(delta);
             }
             for (Missile missile : missiles) {
-            	missile.update(delta);
+                missile.update(delta);
             }
             collisions();
             protocol.sendGameState();
             Iterator<Player> racerIterator = racers.iterator();
-            while(racerIterator.hasNext()) {
-            	Player player = racerIterator.next();
-            	if (player.getCompletedLaps() == laps) {
+            while (racerIterator.hasNext()) {
+                Player player = racerIterator.next();
+                if (player.getCompletedLaps() == laps) {
                     racerIterator.remove();
                     finished.add(player);
                 }
             }
-            if(racers.isEmpty()) {
-            	advanceGameState();
+            if (racers.isEmpty()) {
+                advanceGameState();
             }
-            while(!newProjectiles.isEmpty()) {
-            	GameObject go = newProjectiles.poll();
-            	if(go instanceof Missile) {
-            		missiles.add((Missile)go);
-            	} else if(go instanceof Mine) {
-            		mines.add((Mine) go);
-            	}
+            while (!newProjectiles.isEmpty()) {
+                GameObject go = newProjectiles.poll();
+                if (go instanceof Missile) {
+                    missiles.add((Missile) go);
+                } else if (go instanceof Mine) {
+                    mines.add((Mine) go);
+                }
             }
-            for(GameObject go : toBeDestroyed) {
-            	missiles.remove(go);
-            	mines.remove(go);
+            for (GameObject go : toBeDestroyed) {
+                missiles.remove(go);
+                mines.remove(go);
             }
         }
     }
