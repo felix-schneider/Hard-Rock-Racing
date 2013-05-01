@@ -22,7 +22,7 @@ the connection is dropped. It has the following form:
  "type":"player",
  "name":NAME, // The display name of the AI. Must be less than 12 letters
  "character":CHARACTER,
- "cartype":CARTYPE
+ "cartype":CARTYPE,
  "tracktiled":true/false
 }
 The tracktiled field is optional. If set to true, the map will not be transmitted
@@ -101,7 +101,7 @@ The finish line has the value 0x00ff00
 }
 
 {"message":"tile",
- "type":"Curve/Straight/FinishLine"
+ "type":"Curve/Straight/FinishLine",
  "orientation":"UP/DOWN/LEFT/RIGHT"
 }
 The starting direction is the orientation of the finish tile. Other than that,
@@ -115,7 +115,7 @@ which describes the locations of all players and other dynamic objects
 start of the race.
 
 {"message":"gamestate",
- "time":SERVERTIME // time since the race started, in seconds
+ "time":SERVERTIME, // time since the race started, in seconds
  "cars":[CAR1, CAR2, ...],
  "missiles":[MISSILE1, ...],
  "mines":[MINE1, ...]
@@ -129,8 +129,9 @@ PLAYER
  "name":NAME,
  "character":CHARACTER,
  "cartype":CARTYPE,
+ "carID":ID
 }
-ID is the ID of the CAR object this AI is currently controlling, or 0 if it is
+carID is the ID of the CAR object this AI is currently controlling, or 0 if it is
 not currently driving one (it is not racing, the race has not started, or it
 has not yet respawned)
 
@@ -138,13 +139,13 @@ CAR
 ---
 {"message":"car",
  "id":ID,
- "driver":playername
- "hp":hitpoints
+ "driver":playername,
+ "hp":hitpoints,
  "locationX":locX,
  "locationY":locY,
  "speedX":speedX,
  "speedY":speedY,
- "facing":facing	// in radians, 0 is towards positive x
+ "facing":facing,	// in radians, 0 is towards positive x
  "missiles":missiles,
  "boosts":boosts,
  "mines":mines,
@@ -171,7 +172,8 @@ MINE
 
 {"message":"mine",
  "locationX":locX,
- "locationY":locY}
+ "locationY":locY
+}
 
 LAPCOMPLETE
 -----------
@@ -186,7 +188,7 @@ MISSILEHIT
 When a player is hit by another player's missile, all players are sent a
 missilehit package:
 {"message":"missilehit",
- "missile":id
+ "missile":id,
  "target":playername,
  "shooter":playername
 }
@@ -195,7 +197,7 @@ MINEHIT
 -------
 When a player drives into a mine, all players get a message
 {"message":"minehit",
- "mine":id
+ "mine":id,
  "target":playername
 }
 
@@ -232,7 +234,7 @@ ACTION
 The ai communicates to the server that it wants its car to take an action in
 the following format:
 {"message":"action",
- "type":type,
+ "type":type
 }
 type is one of:
 turnleft
