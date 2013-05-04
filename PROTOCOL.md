@@ -113,6 +113,9 @@ The tiled track object looks as follows
 ```json
 {"message":"track",
  "tiled":true,
+ "width": WIDTH,
+ "height":HEIGHT,
+ "startdir":"UP/DOWN/LEFT/RIGHT",
  "tiles":[TILE, ...]
 }
 ```
