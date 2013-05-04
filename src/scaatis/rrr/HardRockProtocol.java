@@ -104,7 +104,7 @@ public class HardRockProtocol {
         }
         players.put(connection, player);
         if (player.isObserver()) {
-            transmitTrack(connection);
+            connection.send(getGameStartMessage(player.transferMapTiled()));
         }
         log(this, "Player " + player.toString() + " connected successfully.");
         hasPlayers = getNumberOfPlayers() > 0;
@@ -141,19 +141,8 @@ public class HardRockProtocol {
     }
 
     public void sendGameStart() {
-        JSONObject message = new JSONObject();
-        message.put("message", "gamestart");
-        ArrayList<JSONObject> players = new ArrayList<>();
-        for (Player player : game.getRacers()) {
-            players.add(player.toJSON());
-        }
-        message.put("players", players);
-        message.put("laps", HardRockRacing.laps);
-        JSONObject messageTiled = new JSONObject(message, new String[] { "message", "players", "laps" });
-        message.put("track", game.getCurrentTrack().toJSON(false));
-        messageTiled.put("track", game.getCurrentTrack().toJSON(true));
-        String notTiled = message.toString();
-        String tiled = messageTiled.toString();
+        String notTiled = getGameStartMessage(false).toString();
+        String tiled = getGameStartMessage(true).toString();
         for (Connection connection : this.players.keySet()) {
             Player player = this.players.get(connection);
             if (player == null) {
@@ -413,15 +402,21 @@ public class HardRockProtocol {
         }
         game.startPreRace(racers);
     }
-
-    protected void transmitTrack(Connection connection) {
-        Player pl = players.get(connection);
-        if (pl == null) {
-            return;
+    
+    private JSONObject getGameStartMessage(boolean tiled) {
+        JSONObject message = new JSONObject();
+        message.put("message", "gamestart");
+        
+        ArrayList<JSONObject> players = new ArrayList<>();
+        for (Player player : game.getRacers()) {
+            players.add(player.toJSON());
         }
-        if (game.getCurrentTrack() != null) {
-            connection.send(game.getCurrentTrack().toJSON(pl.transferMapTiled()));
-        }
+        message.put("players", players);
+        
+        message.put("laps", HardRockRacing.laps);
+        
+        message.put("track", game.getCurrentTrack().toJSON(tiled));
+        return message;
     }
 
     private void disconnect(Connection connection) {
