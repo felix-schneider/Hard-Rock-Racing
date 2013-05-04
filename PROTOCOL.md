@@ -21,7 +21,7 @@ the connection is dropped. It has the following form:
 ```json
 {"message":"connect",
  "type":"player",
- "name":NAME, // The display name of the AI. Must be less than 12 letters
+ "name":NAME,
  "character":CHARACTER,
  "cartype":CARTYPE,
  "tracktiled":true/false
@@ -116,17 +116,9 @@ The tiled track object looks as follows
  "tiles":[TILE, ...]
 }
 ```
-
-with the elements of "tiles" being tile objects
-
-```json
-{"message":"tile",
- "type":"Curve/Straight/FinishLine",
- "orientation":"UP/DOWN/LEFT/RIGHT"
-}
-```
-The starting direction is the orientation of the finish tile. Other than that,
-the finish tile is the same as a straight tile.
+The elements of tiles are Strings, and each is one of "straight", "finish",
+"turnleft", "turnright". Note that left and right assume the coordinate origin
+in the upper left.
 
 GAMESTATE
 ---------

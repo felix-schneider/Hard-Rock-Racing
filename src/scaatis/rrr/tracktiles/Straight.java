@@ -91,4 +91,8 @@ public class Straight extends TrackTile {
 		res.translate(rel.x, rel.y);
 		return new TrackState(res, direction);
 	}
+	
+	public String getDescription(Direction direction) {
+	    return "straight";
+	}
 }

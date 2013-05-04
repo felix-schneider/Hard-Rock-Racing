@@ -124,16 +124,18 @@ public class Track implements Collides, JSONable {
         JSONObject obj = new JSONObject();
         obj.put("message", "track");
         obj.put("tiled", asTiles);
+        obj.put("startdir", startDir.toString());
+        obj.put("width", image.getWidth());
+        obj.put("height", image.getHeight());
         if (asTiles) {
-            List<JSONObject> tiled = new ArrayList<>();
+            List<String> tiled = new ArrayList<>();
+            Direction direction = startDir;
             for (TrackTile tile : tiles) {
-                tiled.add(tile.toJSON());
+                tiled.add(tile.getDescription(direction));
+                direction = tile.getConnect(direction).getDirection();
             }
             obj.put("tiles", tiled);
         } else {
-            obj.put("width", image.getWidth());
-            obj.put("height", image.getHeight());
-            obj.put("startdir", startDir.toString());
             obj.put("data", ((DataBufferInt) image.getRaster().getDataBuffer()).getData());
         }
         return obj;

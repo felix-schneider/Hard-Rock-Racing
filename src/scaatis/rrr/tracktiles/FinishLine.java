@@ -22,4 +22,11 @@ public class FinishLine extends CheckPoint {
         }
         return start;
     }
+
+    @Override
+    public String getDescription(Direction direction) {
+        return "finish";
+    }
+    
+    
 }

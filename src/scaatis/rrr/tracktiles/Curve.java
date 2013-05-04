@@ -142,4 +142,17 @@ public class Curve extends TrackTile {
 		res.translate(rel.x, rel.y);
 		return new TrackState(res, direction.clockwise());
 	}
+
+    @Override
+    public String getDescription(Direction direction) {
+        String left = "turnleft";
+        String right = "turnright"; 
+        if(direction == getOrientation()) {
+            return right;
+        } else {
+            return left;
+        }
+    }
+	
+	
 }

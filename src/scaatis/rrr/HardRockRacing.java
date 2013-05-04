@@ -163,6 +163,7 @@ public class HardRockRacing {
             stop();
             throw new RuntimeException(e);
         }
+        System.out.println(currentTrack.toJSON(true).toString());
         curIndex = (curIndex + 1) % maps.size();
         if (racers.size() > 4 || racers.isEmpty()) {
             stop();

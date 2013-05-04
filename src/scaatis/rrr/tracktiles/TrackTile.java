@@ -51,4 +51,6 @@ public abstract class TrackTile implements JSONable {
 		obj.put("orientation", getOrientation().toString());
 		return obj;
 	}
+	
+	public abstract String getDescription(Direction direction);
 }
