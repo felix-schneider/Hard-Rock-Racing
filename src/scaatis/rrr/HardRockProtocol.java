@@ -103,7 +103,7 @@ public class HardRockProtocol {
             }
         }
         players.put(connection, player);
-        if (player.isObserver()) {
+        if (player.isObserver() && game.getCurrentTrack() != null) {
             connection.send(getGameStartMessage(player.transferMapTiled()));
         }
         log(this, "Player " + player.toString() + " connected successfully.");
