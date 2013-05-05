@@ -98,7 +98,7 @@ The tiled track object looks as follows
 }
 ```
 The startdir field describes which direction the players will face when starting.
-DOWN is defined as negative y, LEFT as negative x.
+DOWN is defined as positive y, LEFT as negative x.
 "data" is a one-dimensional array representing the track. It can be thought of
 as an image. The point x, y on the track is in x + y * width in the data array. 
 Note that this might be very long.
