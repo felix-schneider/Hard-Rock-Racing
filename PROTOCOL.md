@@ -162,7 +162,7 @@ CAR
  "locationY":locY,
  "speedX":speedX,
  "speedY":speedY,
- "facing":facing,	// in radians, 0 is towards positive x
+ "facing":facing,	// in radians, 0 is towards positive x, 0.5pi towards positive y
  "missiles":missiles,
  "boosts":boosts,
  "mines":mines,
