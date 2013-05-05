@@ -141,6 +141,7 @@ public class Track implements Collides, JSONable {
                 array.put(tile.getDescription(direction));
                 array.put(tile.getLocation().getX());
                 array.put(tile.getLocation().getY());
+                tiled.add(array);
                 direction = tile.getConnect(direction).getDirection();
             }
             obj.put("tiles", tiled);
