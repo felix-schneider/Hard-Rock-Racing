@@ -294,9 +294,15 @@ public class HardRockProtocol {
             return null;
         }
         if (type.equals("observer")) {
-            log(this, "Handshake successful for new observer");
+            boolean tiledMap = false;
+            try {
+                tiledMap = object.getBoolean("tracktiled");
+            } catch (JSONException e) {
+
+            }
+            log(this, "Handshake successful for new observer with tiledTrack " + tiledMap);
             err.println(successfulHandshake.toString());
-            return new Player();
+            return new Player(tiledMap);
         } else if (type.equals("player")) {
             String name = getString(object, "name");
             if (name == null || name.equals("")) {

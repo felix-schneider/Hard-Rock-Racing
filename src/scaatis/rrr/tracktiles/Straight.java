@@ -46,8 +46,7 @@ public class Straight extends TrackTile {
 					+ getOrientation().toString() + ".");
 		}
 		Point pos = new Point();
-		if (getOrientation() == Direction.UP
-				|| getOrientation() == Direction.DOWN) {
+		if (getOrientation() == Direction.UP || getOrientation() == Direction.DOWN) {
 			if (direction == Direction.DOWN) {
 				pos.translate(0, SEGMENT_LENGTH);
 			}
@@ -66,8 +65,7 @@ public class Straight extends TrackTile {
 					+ state.getDirection().toString() + " on a straight going "
 					+ getOrientation().toString() + ".");
 		}
-		if (getOrientation() == Direction.UP
-				|| getOrientation() == Direction.DOWN) {
+		if (getOrientation() == Direction.UP || getOrientation() == Direction.DOWN) {
 			if (state.getDirection() == Direction.UP) {
 				setLocation(state.getLocation().x, state.getLocation().y
 						- SEGMENT_LENGTH);

@@ -26,7 +26,7 @@ public class Track implements Collides, JSONable {
         tiles.toArray(tiles2);
         return tiles2;
     }
-    
+
     private List<CheckPoint> checkPoints;
     private FinishLine       finishLine;
     private BufferedImage    image;
@@ -35,19 +35,19 @@ public class Track implements Collides, JSONable {
     private Area             outerArea;
     private Direction        startDir;
     private TrackTile[]      tiles;
-    
+
     private Area             track;
-    
+
     public Track(Direction startDir, List<TrackTile> tiles) {
         this(startDir, convert(tiles));
     }
-    
+
     public Track(Direction startDir, TrackTile... tiles) {
         TrackState startstate = new TrackState(new Point(), startDir);
         TrackState state = startstate;
         checkPoints = new ArrayList<>();
         finishLine = null;
-        
+
         for (TrackTile tile : tiles) {
             if (tile instanceof FinishLine) {
                 if (finishLine == null) {
@@ -63,7 +63,12 @@ public class Track implements Collides, JSONable {
             state = tile.getConnect(state.getDirection());
         }
         if (!state.equals(startstate)) {
-            throw new IllegalArgumentException("Track is not a closed circuit.");
+            for(TrackTile tile : tiles) {
+                System.out.println(tile.toString());
+            }
+            throw new IllegalArgumentException("Track is not a closed circuit: Startdir: "
+                    + startstate.getDirection().toString() + ", enddir " + state.getDirection().toString()
+                    + "; startPos " + startstate.getLocation().toString() + ", endpos " + state.getLocation().toString());
         }
         if (finishLine == null) {
             throw new IllegalArgumentException(
@@ -77,49 +82,49 @@ public class Track implements Collides, JSONable {
         bake();
         makeNegative();
     }
-    
+
     @Override
     public Area getArea() {
         return getNegative();
     }
-    
+
     public List<CheckPoint> getCheckpoints() {
         return new ArrayList<>(checkPoints);
     }
-    
+
     public FinishLine getFinishLine() {
         return finishLine;
     }
-    
+
     public Area getInnerArea() {
         return innerArea;
     }
-    
+
     public Area getNegative() {
         return negative;
     }
-    
+
     public Area getOuterArea() {
         return outerArea;
     }
-    
+
     public Direction getStartDirection() {
         return startDir;
     }
-    
+
     public Area getTrackArea() {
         return track;
     }
-    
+
     public BufferedImage getTrackImage() {
         return image;
     }
-    
+
     @Override
     public JSONObject toJSON() {
         return toJSON(false);
     }
-    
+
     public JSONObject toJSON(boolean asTiles) {
         JSONObject obj = new JSONObject();
         obj.put("message", "track");
@@ -140,14 +145,14 @@ public class Track implements Collides, JSONable {
         }
         return obj;
     }
-    
+
     private void bake() {
         track = new Area();
         for (TrackTile t : tiles) {
             track.add(t.getArea());
         }
         Rectangle bounds = track.getBounds();
-        
+
         track.transform(AffineTransform.getTranslateInstance(-bounds.x,
                 -bounds.y));
         // calculate final location for tiles
@@ -172,7 +177,7 @@ public class Track implements Collides, JSONable {
         g.fill(finishLine.getArea());
         g.dispose();
     }
-    
+
     private void makeNegative() {
         PathIterator iterator = track.getPathIterator(null);
         Path2D pathA = new Path2D.Double();

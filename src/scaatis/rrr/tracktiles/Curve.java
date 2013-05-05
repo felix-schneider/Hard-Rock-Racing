@@ -121,8 +121,7 @@ public class Curve extends TrackTile {
 			rel = new Point(-SEGMENT_LENGTH, -TRACK_WIDTH - SEGMENT_LENGTH);
 			break;
 		case UP:
-			rel = new Point(-SEGMENT_LENGTH - TRACK_WIDTH, -SEGMENT_LENGTH
-					- TRACK_WIDTH);
+			rel = new Point(-SEGMENT_LENGTH - TRACK_WIDTH, -SEGMENT_LENGTH - TRACK_WIDTH);
 			break;
 		case LEFT:
 			rel = new Point(-SEGMENT_LENGTH - TRACK_WIDTH, -SEGMENT_LENGTH);
@@ -140,17 +139,21 @@ public class Curve extends TrackTile {
 		Point res = new Point(getLocation());
 		Point rel = getRelativeConnect(direction);
 		res.translate(rel.x, rel.y);
-		return new TrackState(res, direction.clockwise());
+		Direction outDir;
+        if(direction == getOrientation()) {
+            outDir = direction.clockwise();
+        } else {
+            outDir = direction.cclockwise();
+        }
+		return new TrackState(res, outDir);
 	}
 
     @Override
-    public String getDescription(Direction direction) {
-        String left = "turnleft";
-        String right = "turnright"; 
+    public String getDescription(Direction direction) { 
         if(direction == getOrientation()) {
-            return right;
+            return "turnright";
         } else {
-            return left;
+            return "turnleft";
         }
     }
 	

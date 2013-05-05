@@ -52,7 +52,7 @@ public class Player implements JSONable {
         completedLaps = -1;
         listeners = null;
         missiles = -1;
-        tiledMap = false;
+        this.tiledMap = tiledMap;
         boosts = -1;
         mines = -1;
     }
