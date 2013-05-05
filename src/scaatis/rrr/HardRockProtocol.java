@@ -173,6 +173,7 @@ public class HardRockProtocol {
             obj.put("driver", player.getName());
             obj.put("missiles", player.getMissiles());
             obj.put("boosts", player.getBoosts());
+            obj.put("mines", player.getMines());
             obj.put("lapscomplete", player.getCompletedLaps());
             cars.add(obj);
         }

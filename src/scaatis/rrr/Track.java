@@ -14,6 +14,7 @@ import java.awt.image.DataBufferInt;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import scaatis.rrr.tracktiles.CheckPoint;
@@ -133,10 +134,13 @@ public class Track implements Collides, JSONable {
         obj.put("width", image.getWidth());
         obj.put("height", image.getHeight());
         if (asTiles) {
-            List<String> tiled = new ArrayList<>();
+            List<JSONArray> tiled = new ArrayList<>();
             Direction direction = startDir;
             for (TrackTile tile : tiles) {
-                tiled.add(tile.getDescription(direction));
+                JSONArray array = new JSONArray();
+                array.put(tile.getDescription(direction));
+                array.put(tile.getLocation().getX());
+                array.put(tile.getLocation().getY());
                 direction = tile.getConnect(direction).getDirection();
             }
             obj.put("tiles", tiled);

@@ -119,9 +119,9 @@ The tiled track object looks as follows
  "tiles":[TILE, ...]
 }
 ```
-The elements of tiles are Strings, and each is one of "straight", "finish",
-"turnleft", "turnright". Note that left and right assume the coordinate origin
-in the upper left.
+The elements of tiles take the following form:
+["straight"/"turnleft"/"turnright"/"finish", x, y]
+where x and y are the coordinates of the tile
 
 GAMESTATE
 ---------

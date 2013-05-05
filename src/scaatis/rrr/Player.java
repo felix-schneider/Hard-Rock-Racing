@@ -218,6 +218,10 @@ public class Player implements JSONable {
     	character = null;
     }
     
+    public int getMines() {
+        return mines;
+    }
+    
     public int getMissiles() {
         return missiles;
     }
