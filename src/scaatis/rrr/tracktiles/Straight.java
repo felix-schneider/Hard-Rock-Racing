@@ -10,8 +10,8 @@ import scaatis.rrr.TrackState;
 public class Straight extends TrackTile {
 
 	private static final Rectangle vertical = new Rectangle(TRACK_WIDTH,
-			SEGMENT_LENGTH);
-	private static final Rectangle horizontal = new Rectangle(SEGMENT_LENGTH,
+			SEGMENT_LENGTH * 3);
+	private static final Rectangle horizontal = new Rectangle(SEGMENT_LENGTH * 3,
 			TRACK_WIDTH);
 
 	public Straight(Direction orientation) {
@@ -48,11 +48,11 @@ public class Straight extends TrackTile {
 		Point pos = new Point();
 		if (getOrientation() == Direction.UP || getOrientation() == Direction.DOWN) {
 			if (direction == Direction.DOWN) {
-				pos.translate(0, SEGMENT_LENGTH);
+				pos.translate(0, SEGMENT_LENGTH * 3);
 			}
 		} else {
 			if (direction == Direction.RIGHT) {
-				pos.translate(SEGMENT_LENGTH, 0);
+				pos.translate(SEGMENT_LENGTH * 3, 0);
 			}
 		}
 		return pos;
@@ -68,13 +68,13 @@ public class Straight extends TrackTile {
 		if (getOrientation() == Direction.UP || getOrientation() == Direction.DOWN) {
 			if (state.getDirection() == Direction.UP) {
 				setLocation(state.getLocation().x, state.getLocation().y
-						- SEGMENT_LENGTH);
+						- SEGMENT_LENGTH * 3);
 			} else {
 				setLocation(state.getLocation());
 			}
 		} else {
 			if (state.getDirection() == Direction.LEFT) {
-				setLocation(state.getLocation().x - SEGMENT_LENGTH,
+				setLocation(state.getLocation().x - SEGMENT_LENGTH * 3,
 						state.getLocation().y);
 			} else {
 				setLocation(state.getLocation());

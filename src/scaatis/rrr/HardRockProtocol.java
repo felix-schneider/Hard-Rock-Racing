@@ -72,6 +72,7 @@ public class HardRockProtocol {
     private boolean                               hasPlayers;
     private ConnectionListener                    listener;
     private ConcurrentHashMap<Connection, Player> players;
+    private ConcurrentLinkedQueue<Player>         playerQueue;
     private ServerSocket                          server;
 
     public HardRockProtocol(HardRockRacing game) {
@@ -86,6 +87,7 @@ public class HardRockProtocol {
         log(this, "Opened socket on port " + server.getLocalPort());
         listener = new ConnectionListener(server, this);
         hasPlayers = false;
+        playerQueue = new ConcurrentLinkedQueue<>();
     }
 
     public void connectPlayer(Connection connection, Player player) {
@@ -101,6 +103,7 @@ public class HardRockProtocol {
                     return;
                 }
             }
+            playerQueue.add(player);
         }
         players.put(connection, player);
         if (player.isObserver() && game.getCurrentTrack() != null) {
@@ -224,6 +227,9 @@ public class HardRockProtocol {
         message.put("message", "raceover");
         message.put("placement", placement);
         sendToAll(message.toString());
+        for (Player player : placement) {
+            playerQueue.add(player);
+        }
     }
 
     public void sendToAll(String message) {
@@ -384,15 +390,9 @@ public class HardRockProtocol {
     protected void startRace() {
         // Pick racers
         ArrayList<Player> racers = new ArrayList<>();
-        ArrayList<Player> racerPool = new ArrayList<>();
-        for (Player player : players.values()) {
-            if (!player.isObserver()) {
-                racerPool.add(player);
-            }
-        }
 
-        for (int i = 0; i < Math.min(4, racerPool.size()); i++) {
-            racers.add(Util.getRandom(racerPool, racers));
+        for (int i = 0; i < 4 && !playerQueue.isEmpty(); i++) {
+            racers.add(playerQueue.poll());
         }
 
         // Assign Characters
@@ -409,19 +409,19 @@ public class HardRockProtocol {
         }
         game.startPreRace(racers);
     }
-    
+
     private JSONObject getGameStartMessage(boolean tiled) {
         JSONObject message = new JSONObject();
         message.put("message", "gamestart");
-        
+
         ArrayList<JSONObject> players = new ArrayList<>();
         for (Player player : game.getRacers()) {
             players.add(player.toJSON());
         }
         message.put("players", players);
-        
+
         message.put("laps", HardRockRacing.laps);
-        
+
         message.put("track", game.getCurrentTrack().toJSON(tiled));
         return message;
     }
@@ -433,6 +433,7 @@ public class HardRockProtocol {
             game.dropPlayer(player);
         }
         players.remove(connection);
+        playerQueue.remove(player);
         hasPlayers = getNumberOfPlayers() > 0;
         game.updateGUI();
     }

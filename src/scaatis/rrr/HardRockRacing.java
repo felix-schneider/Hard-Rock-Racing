@@ -453,7 +453,7 @@ public class HardRockRacing {
         } else if (state == RaceState.RACE) {
             serverTime += delta;
             for (Player player : racers) {
-                if (player.getCar().isDestroyed()) {
+                if (player.getCar() == null) {
                     spawn(player);
                 }
                 player.getCar().update(delta);
