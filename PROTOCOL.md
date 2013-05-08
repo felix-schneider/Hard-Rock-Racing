@@ -229,6 +229,14 @@ When a player drives into a mine, all players get a message
 }
 ```
 
+BOOST
+-----
+```json
+{"message":"boost",
+ "player":playername
+}
+```
+
 DESTROYED
 ---------
 When a player's car is destroyed, all players are sent a destroyed package:

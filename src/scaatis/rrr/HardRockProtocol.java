@@ -208,7 +208,7 @@ public class HardRockProtocol {
 
     public void sendMineHit(Mine mine, Player victim) {
         JSONObject message = new JSONObject();
-        message.put("message", "mine");
+        message.put("message", "minehit");
         message.put("mine", mine.getID());
         message.put("target", victim.getName());
         sendToAll(message.toString());
@@ -220,6 +220,13 @@ public class HardRockProtocol {
         message.put("missile", missile.getID());
         message.put("target", victim.getName());
         message.put("shooter", missile.getShooter().getName());
+        sendToAll(message.toString());
+    }
+    
+    public void sendBoost(Player player) {
+        JSONObject message = new JSONObject();
+        message.put("message", "boost");
+        message.put("player", player.getName());
         sendToAll(message.toString());
     }
 
@@ -482,6 +489,7 @@ public class HardRockProtocol {
             player.fireMissile();
         } else if (type.equals("boost")) {
             player.boost();
+            sendBoost(player);
         } else if (type.equals("mine")) {
             player.dropMine();
         } else {

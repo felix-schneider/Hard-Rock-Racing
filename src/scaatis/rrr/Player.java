@@ -164,7 +164,7 @@ public class Player implements JSONable {
         if (car != null && mines > 0) {
             mines--;
             Vector2D offset = new Vector2D.Polar(car.getFacing() + Math.PI,
-                    Car.hitbox.getWidth());
+                    Car.hitbox.getWidth() * .6);
             Mine mine = new Mine(offset.applyTo(car.getLocation()));
             // activate Listeners
             MineDropListener[] ls = listeners.getListeners(MineDropListener.class);
@@ -214,6 +214,9 @@ public class Player implements JSONable {
     	completedLaps = 0;
     	checkPoints.clear();
     	listeners = new EventListenerList();
+    	missiles = maxMissiles;
+    	boosts = maxBoosts;
+    	mines = maxMines;
     	setCar(null);
     	character = null;
     }

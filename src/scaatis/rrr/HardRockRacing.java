@@ -29,7 +29,7 @@ public class HardRockRacing {
 
     public static final boolean                 debug           = true;
     public static final int                     fps             = 30;
-    public static final int                     laps            = 1;
+    public static final int                     laps            = 4;
     public static final int                     pauseAfterRace  = 10;
     public static final int                     pauseBeforeRace = 5;
 
@@ -282,6 +282,7 @@ public class HardRockRacing {
                 }
                 if (collide(missile, player.getCar())) {
                     missile.collideWith(player.getCar());
+                    protocol.sendMissileHit(missile, player);
                 }
             }
         }
@@ -289,14 +290,17 @@ public class HardRockRacing {
             for (Player player : racers) {
                 if (player.getCar() != null && collide(mine, player.getCar())) {
                     mine.collideWith(player.getCar());
+                    protocol.sendMineHit(mine, player);
                 }
             }
         }
-        for (Player player : racers) {
+        for (int i = 0; i < racers.size(); i++) {
+            Player player = racers.get(i);
             if (player.getCar() == null) {
                 continue;
             }
-            if (collide(player.getCar(), currentTrack)) {
+            if (collide(player.getCar(), currentTrack) ||
+                    !player.getCar().getArea().intersects(currentTrack.getArea().getBounds2D())) {
                 player.getCar().collideWith(currentTrack);
             }
             for (CheckPoint checkpoint : currentTrack.getCheckpoints()) {
@@ -304,7 +308,8 @@ public class HardRockRacing {
                     player.getCar().collideWith(checkpoint);
                 }
             }
-            for (Player player2 : racers) {
+            for (int j = i + 1; j < racers.size(); j++) {
+                Player player2 = racers.get(i);
                 if (player2.getCar() != null && collide(player.getCar(), player2.getCar())) {
                     Car.collide(player.getCar(), player2.getCar());
                 }

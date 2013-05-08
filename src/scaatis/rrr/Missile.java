@@ -11,7 +11,7 @@ import scaatis.util.Vector2D;
 
 public class Missile extends GameObject implements Collides {
 	public static final int range = 1000;
-	public static final double speed = 500;
+	public static final double speed = 600;
 	public static final int damage = 2;
 	public static final Rectangle hitbox = new Rectangle(20, 8);
 

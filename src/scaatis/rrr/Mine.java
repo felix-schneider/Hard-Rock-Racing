@@ -20,6 +20,7 @@ public class Mine extends GameObject implements Collides {
 	}
 
 	public void collideWith(Car other) {
+	    other.mine();
 		other.damage(damage);
 		destroy();
 	}
