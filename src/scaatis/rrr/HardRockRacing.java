@@ -4,6 +4,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -495,8 +496,7 @@ public class HardRockRacing {
     }
 
     public static void main(String[] args) {
-        ArrayList<String> tracks = new ArrayList<>();
-        tracks.add("res/basictrack");
+        List<String> tracks = Arrays.asList(args);
         HardRockRacing racing = new HardRockRacing(tracks);
         racing.start();
     }

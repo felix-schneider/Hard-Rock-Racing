@@ -6,9 +6,6 @@ Curve LEFT
 CheckPoint UP
 Straight UP
 Straight UP
-Curve UP
-Straight RIGHT
-Curve DOWN
 Straight UP
 Curve UP
 CheckPoint RIGHT
@@ -19,8 +16,5 @@ Curve RIGHT
 CheckPoint DOWN
 Straight DOWN
 Straight DOWN
-Curve DOWN
-Straight LEFT
-Curve UP
 Straight DOWN
 Curve DOWN
