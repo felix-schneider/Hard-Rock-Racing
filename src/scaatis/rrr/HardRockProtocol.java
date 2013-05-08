@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -225,7 +226,11 @@ public class HardRockProtocol {
     public void sendRaceOver(List<Player> placement) {
         JSONObject message = new JSONObject();
         message.put("message", "raceover");
-        message.put("placement", placement);
+        JSONArray array = new JSONArray();
+        for (Player player : placement) {
+            array.put(player.toJSON());
+        }
+        message.put("placement", array);
         sendToAll(message.toString());
         for (Player player : placement) {
             playerQueue.add(player);

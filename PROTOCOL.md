@@ -249,7 +249,7 @@ all players:
  "placement":[WINNER, SECOND, THIRD, LOSER]
 }
 ```
-WINNER etc. are the names of players
+WINNER etc. are player objects
 
 OBSERVER
 --------

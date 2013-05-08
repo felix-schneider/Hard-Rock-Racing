@@ -29,7 +29,7 @@ public class HardRockRacing {
 
     public static final boolean                 debug           = true;
     public static final int                     fps             = 30;
-    public static final int                     laps            = 4;
+    public static final int                     laps            = 1;
     public static final int                     pauseAfterRace  = 10;
     public static final int                     pauseBeforeRace = 5;
 
